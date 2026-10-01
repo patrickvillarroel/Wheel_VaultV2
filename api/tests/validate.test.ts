@@ -35,7 +35,7 @@ function buildApp() {
 const app = buildApp();
 
 describe('validate', () => {
-  it('deja pasar un body valido', async () => {
+  it('deja pasar un body válido', async () => {
     const response = await request(app).post('/cars').send({ model: '911 GT3', quantity: 2 });
 
     expect(response.status).toBe(200);

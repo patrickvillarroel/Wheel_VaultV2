@@ -15,12 +15,12 @@ import { carsRouter } from './modules/cars/cars.routes.js';
 import { brandsRouter } from './modules/brands/brands.routes.js';
 
 /**
- * Las apps nativas no envian cabecera `Origin`, asi que CORS no las afecta: es
+ * Las apps nativas no envian cabecera `Origin`, así que CORS no las afecta: es
  * una proteccion del navegador. Esta lista existe para Expo Web en desarrollo y
  * para cualquier frontend web futuro.
  *
  * Un origen no permitido recibe la respuesta sin las cabeceras CORS y es el
- * navegador quien la bloquea. Devolver un error aqui produciria un 500 confuso.
+ * navegador quien la bloquea. Devolver un error aquí produciría un 500 confuso.
  */
 const corsOptions: CorsOptions = {
   origin(origin, callback) {
@@ -48,7 +48,7 @@ export function createApp(): Express {
     app.set('trust proxy', 1);
   }
 
-  // Primero de la cadena: todo lo que venga despues necesita el requestId.
+  // Primero de la cadena: todo lo que venga después necesita el requestId.
   app.use(requestContext);
 
   app.use(
@@ -59,8 +59,8 @@ export function createApp(): Express {
       // El healthcheck se consulta cada pocos segundos: inundaria los logs.
       autoLogging: { ignore: (req) => req.url === '/health' },
       /**
-       * Una linea por peticion en vez del volcado completo de req y res.
-       * Ademas de legible es mas seguro: al no registrar las cabeceras, no hay
+       * Una linea por petición en vez del volcado completo de req y res.
+       * Ademas de legible es más seguro: al no registrar las cabeceras, no hay
        * forma de que un token acabe en el log ni aunque falle la redaccion.
        */
       serializers: {

@@ -4,7 +4,7 @@ import request from 'supertest';
 /**
  * Pruebas HTTP de la API de marcas, con los repositorios simulados.
  *
- * Lo que importa aqui: que el catalogo exija token (el car_count son datos
+ * Lo que importa aquí: que el catalogo exija token (el car_count son datos
  * personales), que una marca inexistente de 404 y que el listado de autos de
  * una marca siga acotado por el user_id del token.
  */
@@ -52,12 +52,12 @@ function authed(path: string) {
   return request(app).get(path).set('Authorization', `Bearer ${token}`);
 }
 
-describe('autenticacion', () => {
+describe('autenticación', () => {
   it.each(['/api/v1/brands', `/api/v1/brands/${BRAND_ID}`, `/api/v1/brands/${BRAND_ID}/cars`])(
     '%s exige token',
     async (path) => {
       // El catalogo es casi todo global, pero el car_count de cada marca son
-      // datos de la coleccion del usuario.
+      // datos de la colección del usuario.
       const response = await request(app).get(path);
 
       expect(response.status).toBe(401);
@@ -167,9 +167,9 @@ describe('GET /api/v1/brands/:id/cars', () => {
     );
   });
 
-  it('404 cuando la marca no existe, en vez de una lista vacia enganosa', async () => {
+  it('404 cuando la marca no existe, en vez de una lista vacía enganosa', async () => {
     // Distinguir "esa marca no existe" de "no tienes autos de esa marca" es lo
-    // que permite a la pantalla mostrar un mensaje util.
+    // que permite a la pantalla mostrar un mensaje útil.
     vi.mocked(brandsRepository.findById).mockResolvedValue(null);
 
     const response = await authed(`/api/v1/brands/${BRAND_ID}/cars`);
@@ -179,7 +179,7 @@ describe('GET /api/v1/brands/:id/cars', () => {
     expect(carsRepository.list).not.toHaveBeenCalled();
   });
 
-  it('200 con lista vacia cuando la marca existe pero no hay autos', async () => {
+  it('200 con lista vacía cuando la marca existe pero no hay autos', async () => {
     vi.mocked(brandsRepository.findById).mockResolvedValue(brandRow);
     vi.mocked(carsRepository.list).mockResolvedValue([]);
 
@@ -189,7 +189,7 @@ describe('GET /api/v1/brands/:id/cars', () => {
     expect(response.body.data).toEqual([]);
   });
 
-  it('usa el mismo contrato de paginacion que GET /cars', async () => {
+  it('usa el mismo contrato de paginación que GET /cars', async () => {
     vi.mocked(brandsRepository.findById).mockResolvedValue(brandRow);
     vi.mocked(carsRepository.list).mockResolvedValue([]);
 

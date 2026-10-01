@@ -7,11 +7,11 @@ import { sendError } from '../shared/http/envelope.js';
  * Limite de peticiones por IP.
  *
  * Es una defensa contra abuso y fuerza bruta, no contra un ataque distribuido:
- * el almacen esta en memoria, asi que con varias instancias cada una lleva su
- * propia cuenta. Para produccion con mas de una instancia hay que mover el
+ * el almacen esta en memoria, así que con varias instancias cada una lleva su
+ * propia cuenta. Para producción con más de una instancia hay que mover el
  * almacen a Redis (anotado en docs/security.md, fase 10).
  *
- * El login NO pasa por aqui: lo gestiona Supabase Auth, que tiene su propio
+ * El login NO pasa por aquí: lo gestiona Supabase Auth, que tiene su propio
  * rate limiting (ADR-001).
  */
 
@@ -24,7 +24,7 @@ const baseOptions: Partial<Options> = {
     sendError(res, {
       status: 429,
       code: ERROR_CODES.RATE_LIMITED,
-      message: 'Demasiadas peticiones. Intentalo de nuevo en unos minutos.',
+      message: 'Demasiadas peticiones. Inténtalo de nuevo en unos minutos.',
       requestId: req.requestId,
     });
   },

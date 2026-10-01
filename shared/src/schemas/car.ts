@@ -2,18 +2,18 @@ import { z } from 'zod';
 import { CAR_LIMITS, maxCarYear } from '../limits.js';
 
 /**
- * Esquemas de validacion de un auto.
+ * Esquemas de validación de un auto.
  *
- * Viven aqui, en el paquete compartido, porque los usan los dos lados: Express
- * los aplica como ultima palabra y la app movil los reutiliza en los
- * formularios con React Hook Form. Una sola definicion evita que el movil
+ * Viven aquí, en el paquete compartido, porque los usan los dos lados: Express
+ * los aplica como última palabra y la app movil los reutiliza en los
+ * formularios con React Hook Form. Una sola definición evita que el movil
  * acepte algo que la API rechaza, o al reves.
  *
  * Los CHECK de PostgreSQL son la tercera red (ver docs/database.md).
  */
 
 /**
- * Texto opcional. Trata la cadena vacia como "sin valor": un formulario movil
+ * Texto opcional. Trata la cadena vacía como "sin valor": un formulario movil
  * envia '' cuando el usuario borra el campo, y guardar '' en vez de NULL
  * ensucia los datos y complica las consultas.
  *
@@ -24,7 +24,7 @@ function optionalText(max: number, label: string) {
   return z
     .string()
     .trim()
-    .max(max, `${label}: maximo ${max} caracteres`)
+    .max(max, `${label}: máximo ${max} caracteres`)
     .nullable()
     .optional()
     .transform((value) => (value === '' ? null : value));
@@ -33,10 +33,10 @@ function optionalText(max: number, label: string) {
 /**
  * Definiciones por campo, reutilizadas por el esquema de creacion y el de
  * edicion. Deliberadamente SIN `.default()`: un default dentro de un esquema
- * parcial haria que un PATCH que no menciona `quantity` la reiniciara a 1.
+ * parcial haría que un PATCH que no menciona `quantity` la reiniciara a 1.
  */
 const fields = {
-  brand_id: z.uuid('Selecciona un fabricante valido'),
+  brand_id: z.uuid('Selecciona un fabricante válido'),
 
   model: z
     .string()
@@ -44,26 +44,26 @@ const fields = {
     .min(CAR_LIMITS.model.min, 'El modelo es obligatorio')
     .max(CAR_LIMITS.model.max, `El modelo no puede superar ${CAR_LIMITS.model.max} caracteres`),
 
-  vehicle_make: optionalText(CAR_LIMITS.vehicleMake.max, 'La marca del vehiculo'),
+  vehicle_make: optionalText(CAR_LIMITS.vehicleMake.max, 'La marca del vehículo'),
 
   year: z
     .number()
-    .int('El año debe ser un numero entero')
+    .int('El año debe ser un número entero')
     .min(CAR_LIMITS.year.min, `El año debe ser ${CAR_LIMITS.year.min} o posterior`)
     .refine(
       (value) => value <= maxCarYear(),
-      // Se comprueba en cada validacion, no al cargar el modulo: un proceso
+      // Se comprueba en cada validación, no al cargar el módulo: un proceso
       // levantado en diciembre debe aceptar el año nuevo sin reiniciarse.
-      `El año no puede ser mas de ${CAR_LIMITS.year.maxOffsetFromNow} años en el futuro`,
+      `El año no puede ser más de ${CAR_LIMITS.year.maxOffsetFromNow} años en el futuro`,
     )
     .nullable()
     .optional(),
 
-  description: optionalText(CAR_LIMITS.description.max, 'La descripcion'),
+  description: optionalText(CAR_LIMITS.description.max, 'La descripción'),
 
   quantity: z
     .number()
-    .int('La cantidad debe ser un numero entero')
+    .int('La cantidad debe ser un número entero')
     .min(CAR_LIMITS.quantity.min, `La cantidad debe ser al menos ${CAR_LIMITS.quantity.min}`)
     .max(CAR_LIMITS.quantity.max, `La cantidad no puede superar ${CAR_LIMITS.quantity.max}`),
 

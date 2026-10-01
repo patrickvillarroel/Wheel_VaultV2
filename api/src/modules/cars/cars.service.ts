@@ -11,7 +11,7 @@ import type { ListCarsQuery } from './cars.schema.js';
  * Reglas de negocio de los autos. No conoce HTTP.
  *
  * `userId` llega SIEMPRE desde el token verificado (req.user.id), nunca desde
- * el cuerpo o la query: por eso es un parametro aparte y no un campo mas de
+ * el cuerpo o la query: por eso es un parametro aparte y no un campo más de
  * los datos de entrada.
  */
 
@@ -24,7 +24,7 @@ export async function listCars(
 ): Promise<Page<Car>> {
   const cursor = query.cursor ? decodeCursor(query.cursor) : undefined;
 
-  // Se pide una fila de mas para saber si hay pagina siguiente sin lanzar un
+  // Se pide una fila de más para saber si hay pagina siguiente sin lanzar un
   // COUNT aparte, que sobre una tabla con RLS es caro.
   const rows = await carsRepository.list(db, userId, {
     brandId: query.brand_id,
@@ -41,9 +41,9 @@ export async function getCar(db: DbClient, userId: string, carId: string): Promi
   const car = await carsRepository.findById(db, userId, carId);
 
   if (!car) {
-    // 404 y no 403 tambien cuando el auto existe pero es de otra persona: un
-    // 403 confirmaria que ese id existe.
-    throw AppError.notFound(ERROR_CODES.CAR_NOT_FOUND, 'No se encontro el auto');
+    // 404 y no 403 también cuando el auto existe pero es de otra persona: un
+    // 403 confirmaría que ese id existe.
+    throw AppError.notFound(ERROR_CODES.CAR_NOT_FOUND, 'No se encontró el auto');
   }
 
   return car;
@@ -86,7 +86,7 @@ export async function updateCar(
   const car = await carsRepository.update(db, userId, carId, patch);
 
   if (!car) {
-    throw AppError.notFound(ERROR_CODES.CAR_NOT_FOUND, 'No se encontro el auto');
+    throw AppError.notFound(ERROR_CODES.CAR_NOT_FOUND, 'No se encontró el auto');
   }
 
   return car;
@@ -96,15 +96,15 @@ export async function deleteCar(db: DbClient, userId: string, carId: string): Pr
   const deleted = await carsRepository.remove(db, userId, carId);
 
   if (!deleted) {
-    throw AppError.notFound(ERROR_CODES.CAR_NOT_FOUND, 'No se encontro el auto');
+    throw AppError.notFound(ERROR_CODES.CAR_NOT_FOUND, 'No se encontró el auto');
   }
 }
 
 /**
  * Comprueba que el fabricante existe y el usuario puede verlo.
  *
- * Las claves foraneas se validan a nivel de sistema y no ven la RLS, asi que
- * sin esta comprobacion un usuario podria apuntar su auto a una marca privada
+ * Las claves foraneas se validan a nivel de sistema y no ven la RLS, así que
+ * sin esta comprobación un usuario podría apuntar su auto a una marca privada
  * de otra persona —acertando el UUID— y quedarse con un auto cuya marca no
  * puede leer.
  */

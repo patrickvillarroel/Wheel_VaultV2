@@ -6,7 +6,7 @@ import * as profileService from './profile.service.js';
 /**
  * Traduce HTTP <-> dominio. No conoce Supabase ni reglas de negocio.
  *
- * Express 5 reenvia solo las promesas rechazadas al manejador de errores, asi
+ * Express 5 reenvia solo las promesas rechazadas al manejador de errores, así
  * que no hace falta try/catch ni un wrapper tipo asyncHandler.
  */
 export const getMe: RequestHandler = async (req, res) => {

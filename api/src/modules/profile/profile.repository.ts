@@ -16,7 +16,7 @@ export async function findById(db: DbClient, userId: string): Promise<ProfileRow
 
   if (error) {
     // El detalle de Postgres se queda en el log; al cliente le llega un 500
-    // generico (ver middleware/errorHandler.ts).
+    // genérico (ver middleware/errorHandler.ts).
     throw AppError.internal('Ha ocurrido un error inesperado', {
       operation: 'profiles.findById',
       code: error.code,

@@ -4,11 +4,11 @@ import { AppError } from '../src/shared/errors/AppError.js';
 import { TEST_USER_ID, signExpiredToken, signTestToken } from './helpers/tokens.js';
 
 /**
- * Verificacion de tokens. Es el control que separa "cualquiera" de "este
- * usuario", asi que cada forma de token invalido tiene su prueba.
+ * Verificación de tokens. Es el control que separa "cualquiera" de "este
+ * usuario", así que cada forma de token invalido tiene su prueba.
  */
 describe('verifyAccessToken', () => {
-  it('acepta un token valido y devuelve el usuario del claim sub', async () => {
+  it('acepta un token válido y devuelve el usuario del claim sub', async () => {
     const token = await signTestToken({ email: 'ana@example.test' });
 
     const user = await verifyAccessToken(token);
@@ -34,7 +34,7 @@ describe('verifyAccessToken', () => {
     });
   });
 
-  it('rechaza un token valido de OTRO proyecto de Supabase (issuer distinto)', async () => {
+  it('rechaza un token válido de OTRO proyecto de Supabase (issuer distinto)', async () => {
     const token = await signTestToken({ issuer: 'https://otro-proyecto.supabase.co/auth/v1' });
 
     await expect(verifyAccessToken(token)).rejects.toMatchObject({
@@ -67,12 +67,12 @@ describe('verifyAccessToken', () => {
 
     try {
       await verifyAccessToken(token);
-      expect.unreachable('deberia haber rechazado el token');
+      expect.unreachable('debería haber rechazado el token');
     } catch (error) {
       expect(error).toBeInstanceOf(AppError);
       // El motivo real ("signature verification failed") va solo a `internal`,
       // que el errorHandler registra en el log pero nunca envia al cliente.
-      expect((error as AppError).message).toBe('El token no es valido');
+      expect((error as AppError).message).toBe('El token no es válido');
     }
   });
 });

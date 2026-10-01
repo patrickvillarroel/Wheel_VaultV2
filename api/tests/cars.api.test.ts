@@ -4,9 +4,9 @@ import request from 'supertest';
 /**
  * Pruebas de la API de autos a nivel HTTP.
  *
- * Los repositorios estan simulados: lo que se verifica aqui es la capa que
- * controlamos nosotros —autenticacion, validacion, traduccion de errores y, lo
- * mas importante, de donde sale el user_id—, no el comportamiento de Postgres.
+ * Los repositorios estan simulados: lo que se verifica aquí es la capa que
+ * controlamos nosotros —autenticación, validación, traduccion de errores y, lo
+ * más importante, de donde sale el user_id—, no el comportamiento de Postgres.
  *
  * El aislamiento real entre usuarios se prueba contra la base de datos en
  * supabase/tests/rls_isolation.sql.
@@ -21,7 +21,7 @@ vi.mock('../src/modules/cars/cars.repository.js', () => ({
 }));
 
 // Se simulan todas las exportaciones, no solo la que usa cars.service: el app
-// completo monta tambien el router de marcas y un mock parcial dejaria
+// completo monta también el router de marcas y un mock parcial dejaria
 // funciones sin definir esperando a que alguien las llame.
 vi.mock('../src/modules/brands/brands.repository.js', () => ({
   listVisible: vi.fn(),
@@ -68,7 +68,7 @@ function authed(method: 'get' | 'post' | 'patch' | 'delete', path: string) {
   return request(app)[method](path).set('Authorization', `Bearer ${token}`);
 }
 
-describe('autenticacion', () => {
+describe('autenticación', () => {
   it.each([
     ['get', '/api/v1/cars'],
     ['post', '/api/v1/cars'],
@@ -85,7 +85,7 @@ describe('autenticacion', () => {
 });
 
 describe('GET /api/v1/cars', () => {
-  it('devuelve la lista con su meta de paginacion', async () => {
+  it('devuelve la lista con su meta de paginación', async () => {
     vi.mocked(carsRepository.list).mockResolvedValue([car]);
 
     const response = await authed('get', '/api/v1/cars');
@@ -119,7 +119,7 @@ describe('GET /api/v1/cars', () => {
     );
   });
 
-  it('pide una fila de mas que el limite solicitado', async () => {
+  it('pide una fila de más que el limite solicitado', async () => {
     vi.mocked(carsRepository.list).mockResolvedValue([]);
 
     await authed('get', '/api/v1/cars?limit=10');
@@ -143,7 +143,7 @@ describe('GET /api/v1/cars', () => {
     expect(vi.mocked(carsRepository.list).mock.calls[0]?.[2]).toMatchObject({ ascending: true });
   });
 
-  it('422 si el limite supera el maximo permitido', async () => {
+  it('422 si el limite supera el máximo permitido', async () => {
     const response = await authed('get', '/api/v1/cars?limit=500');
 
     expect(response.status).toBe(422);
@@ -227,8 +227,8 @@ describe('GET /api/v1/cars/:id', () => {
   });
 
   it('404 cuando no existe o es de otro usuario', async () => {
-    // La RLS mas el filtro por user_id hacen que ambos casos sean
-    // indistinguibles aqui, y eso es intencionado: un 403 confirmaria que ese
+    // La RLS más el filtro por user_id hacen que ambos casos sean
+    // indistinguibles aquí, y eso es intencionado: un 403 confirmaría que ese
     // id existe.
     vi.mocked(carsRepository.findById).mockResolvedValue(null);
 

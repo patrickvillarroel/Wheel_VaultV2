@@ -9,7 +9,7 @@ import * as carsService from './cars.service.js';
 /**
  * Traduce HTTP <-> dominio. No conoce Supabase ni reglas de negocio.
  *
- * Express 5 reenvia solo las promesas rechazadas al manejador de errores, asi
+ * Express 5 reenvia solo las promesas rechazadas al manejador de errores, así
  * que no hace falta try/catch.
  */
 

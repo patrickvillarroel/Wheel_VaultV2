@@ -22,20 +22,20 @@ export interface MeResponse {
 /**
  * Identidad + perfil en una sola llamada.
  *
- * La app la hace al arrancar para decidir si la sesion sigue siendo valida y
+ * La app la hace al arrancar para decidir si la sesión sigue siendo válida y
  * pintar el nombre del usuario; devolver las dos cosas juntas evita dos
  * requests en el camino critico del arranque.
  *
- * El email viene del token, no de la base de datos: la unica fuente de verdad
+ * El email viene del token, no de la base de datos: la única fuente de verdad
  * es auth.users y no lo duplicamos en profiles (ADR-001).
  */
 export async function getMe(db: DbClient, user: AuthenticatedUser): Promise<MeResponse> {
   const profile = await profileRepository.findById(db, user.id);
 
   if (!profile) {
-    // No deberia ocurrir: el trigger handle_new_user() crea el perfil al
+    // No debería ocurrir: el trigger handle_new_user() crea el perfil al
     // registrarse. Si pasa, es un fallo real que conviene ver en los logs.
-    throw AppError.notFound(ERROR_CODES.PROFILE_NOT_FOUND, 'No se encontro el perfil del usuario');
+    throw AppError.notFound(ERROR_CODES.PROFILE_NOT_FOUND, 'No se encontró el perfil del usuario');
   }
 
   return {

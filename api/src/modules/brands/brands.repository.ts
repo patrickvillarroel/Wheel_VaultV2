@@ -6,9 +6,9 @@ import { escapeLikePattern } from '../../shared/sql.js';
  * Acceso a datos de las marcas. No conoce HTTP ni reglas de negocio.
  *
  * Ninguna consulta filtra por usuario, y es correcto: la policy
- * `brands_select_global_or_own` ya devuelve el catalogo global mas las marcas
+ * `brands_select_global_or_own` ya devuelve el catalogo global más las marcas
  * privadas de quien pregunta. Una marca privada de otra persona simplemente no
- * existe desde aqui.
+ * existe desde aquí.
  */
 
 export interface BrandSummary {
@@ -23,7 +23,7 @@ export interface BrandRow extends BrandSummary {
   /**
    * Conteo de autos incrustado. Al ejecutarse bajo la RLS de `cars`, cuenta
    * solo los autos DEL USUARIO que pregunta, que es justo lo que muestra la
-   * pantalla de Marcas: esto es una coleccion personal, no un catalogo publico.
+   * pantalla de Marcas: esto es una colección personal, no un catalogo público.
    */
   cars: { count: number }[];
 }
@@ -33,7 +33,7 @@ const BRAND_SELECT = 'id, name, slug, description, logo_url, cars(count)';
 /**
  * Catalogo completo visible para el usuario, ordenado por nombre.
  *
- * Sin paginacion a proposito: el catalogo esta acotado (32 marcas globales mas
+ * Sin paginación a proposito: el catalogo esta acotado (32 marcas globales más
  * las privadas del usuario) y las dos pantallas que lo consumen —el carrusel de
  * la Home y el selector de fabricante del formulario— necesitan la lista
  * entera. El tope es una red de seguridad, no una pagina.
@@ -79,10 +79,10 @@ export async function findById(db: DbClient, brandId: string): Promise<BrandRow 
 }
 
 /**
- * Comprobacion ligera de existencia y visibilidad, sin traerse el conteo.
+ * Comprobación ligera de existencia y visibilidad, sin traerse el conteo.
  *
  * La usa `cars.service` antes de insertar: las claves foraneas se validan a
- * nivel de sistema y no ven la RLS, asi que sin esto un usuario podria apuntar
+ * nivel de sistema y no ven la RLS, así que sin esto un usuario podría apuntar
  * su auto a una marca privada ajena acertando el UUID.
  */
 export async function findVisibleById(db: DbClient, brandId: string): Promise<BrandSummary | null> {

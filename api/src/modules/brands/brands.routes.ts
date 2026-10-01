@@ -13,7 +13,7 @@ export const brandsRouter = Router();
 /**
  * Solo lectura en el MVP. La creacion de marcas privadas existe en la base de
  * datos (ADR-003) pero no se expone todavia: con 32 marcas en el catalogo no
- * hace falta, y añadir el endpoint sin pantalla que lo use seria inventar
+ * hace falta, y añadir el endpoint sin pantalla que lo use sería inventar
  * alcance.
  *
  * Aun siendo el catalogo mayormente global, las rutas exigen token: el

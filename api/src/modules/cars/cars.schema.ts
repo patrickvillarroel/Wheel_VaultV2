@@ -4,15 +4,15 @@ import { paginationQuerySchema } from '../../shared/pagination.js';
 /**
  * Esquemas propios de la API. Los de creacion y edicion de un auto viven en
  * `@wheel-vault/shared` porque la app movil los reutiliza en sus formularios;
- * estos de aqui describen la URL y no tienen sentido fuera del backend.
+ * estos de aquí describen la URL y no tienen sentido fuera del backend.
  */
 
 export const carIdParamsSchema = z.object({
-  id: z.uuid('El identificador del auto no es valido'),
+  id: z.uuid('El identificador del auto no es válido'),
 });
 
 export const listCarsQuerySchema = paginationQuerySchema.extend({
-  brand_id: z.uuid('El identificador del fabricante no es valido').optional(),
+  brand_id: z.uuid('El identificador del fabricante no es válido').optional(),
 
   /** Busqueda por modelo. Se recorta para que " " no filtre por nada. */
   q: z
@@ -29,7 +29,7 @@ export const listCarsQuerySchema = paginationQuerySchema.extend({
    * modelo es texto libre del usuario: construir ese filtro obliga a escapar
    * comas, parentesis y comillas dentro de la sintaxis `or=()` de PostgREST, y
    * equivocarse ahi es un fallo de filtrado. No hay ninguna pantalla del diseño
-   * que lo pida, asi que entra con la funcion de busqueda, donde se hara bien.
+   * que lo pida, así que entra con la funcion de busqueda, donde se hara bien.
    */
   sort: z.enum(['recent', 'oldest']).default('recent'),
 });

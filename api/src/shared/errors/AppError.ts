@@ -1,10 +1,10 @@
 import { ERROR_CODES, type ApiErrorDetail, type ErrorCode } from '@wheel-vault/shared';
 
 /**
- * Error de dominio con un codigo y un estado HTTP asociados.
+ * Error de dominio con un código y un estado HTTP asociados.
  *
- * Todo lo que llega al cliente pasa por aqui. Cualquier otra excepcion se
- * convierte en un 500 generico sin detalle, para no filtrar informacion interna
+ * Todo lo que llega al cliente pasa por aquí. Cualquier otra excepción se
+ * convierte en un 500 genérico sin detalle, para no filtrar información interna
  * (ver middleware/errorHandler.ts).
  */
 export class AppError extends Error {
@@ -41,7 +41,7 @@ export class AppError extends Error {
     return new AppError({ statusCode: 401, code, message, internal });
   }
 
-  static forbidden(message = 'No tienes permiso para realizar esta accion'): AppError {
+  static forbidden(message = 'No tienes permiso para realizar esta acción'): AppError {
     return new AppError({ statusCode: 403, code: ERROR_CODES.FORBIDDEN, message });
   }
 

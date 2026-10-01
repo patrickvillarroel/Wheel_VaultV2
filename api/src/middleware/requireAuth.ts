@@ -7,20 +7,20 @@ import { AppError } from '../shared/errors/AppError.js';
 const BEARER = /^Bearer (.+)$/i;
 
 /**
- * Exige un access token valido de Supabase Auth.
+ * Exige un access token válido de Supabase Auth.
  *
  * Deja en el request dos cosas:
  *   req.user -> la identidad, con el id tomado del claim `sub` del token
  *   req.db   -> un cliente de Supabase que actua en nombre de ese usuario
  *
- * El `user_id` SIEMPRE sale de aqui. Nunca del body ni de la query: un cliente
- * podria enviar el id de otra persona.
+ * El `user_id` SIEMPRE sale de aquí. Nunca del body ni de la query: un cliente
+ * podría enviar el id de otra persona.
  */
 export const requireAuth: RequestHandler = async (req, _res, next) => {
   const header = req.headers.authorization;
 
   if (!header) {
-    next(AppError.unauthorized(ERROR_CODES.AUTH_TOKEN_MISSING, 'Falta el token de autenticacion'));
+    next(AppError.unauthorized(ERROR_CODES.AUTH_TOKEN_MISSING, 'Falta el token de autenticación'));
     return;
   }
 

@@ -8,7 +8,7 @@ import { carIdParamsSchema, listCarsQuerySchema } from './cars.schema.js';
 
 export const carsRouter = Router();
 
-// Toda la coleccion es privada: no hay ninguna ruta publica aqui.
+// Toda la colección es privada: no hay ninguna ruta pública aquí.
 carsRouter.use(requireAuth);
 
 carsRouter.get('/', validate({ query: listCarsQuerySchema }), carsController.list);

@@ -9,7 +9,7 @@ const valid = {
 };
 
 describe('createCarSchema', () => {
-  it('acepta lo minimo y aplica los valores por defecto', () => {
+  it('acepta lo mínimo y aplica los valores por defecto', () => {
     const result = createCarSchema.parse(valid);
 
     expect(result.quantity).toBe(1);
@@ -70,7 +70,7 @@ describe('createCarSchema', () => {
     expect(result).not.toHaveProperty('id');
   });
 
-  it('rechaza una descripcion que supera el limite', () => {
+  it('rechaza una descripción que supera el limite', () => {
     const result = createCarSchema.safeParse({ ...valid, description: 'x'.repeat(1001) });
 
     expect(result.success).toBe(false);
@@ -86,7 +86,7 @@ describe('updateCarSchema', () => {
 
   it('NO rellena los campos ausentes con valores por defecto', () => {
     // Si `quantity` tuviera un default, un PATCH que solo cambia el modelo
-    // reiniciaria silenciosamente la cantidad a 1.
+    // reiniciaría silenciosamente la cantidad a 1.
     const result = updateCarSchema.parse({ model: '911 GT3 RS' });
 
     expect(result.quantity).toBeUndefined();

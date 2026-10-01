@@ -1,9 +1,9 @@
 /**
- * Limites de validacion compartidos entre el backend (Zod en Express) y la app
+ * Limites de validación compartidos entre el backend (Zod en Express) y la app
  * movil (Zod + React Hook Form). Una sola fuente de verdad: si cambia un limite
- * aqui, cambia en los dos lados y en la migracion SQL correspondiente.
+ * aquí, cambia en los dos lados y en la migración SQL correspondiente.
  *
- * Los CHECK constraints de PostgreSQL son deliberadamente iguales o mas
+ * Los CHECK constraints de PostgreSQL son deliberadamente iguales o más
  * permisivos que estos valores (ver docs/database.md).
  */
 
@@ -12,7 +12,7 @@ export const CAR_LIMITS = {
   vehicleMake: { max: 60 },
   description: { max: 1000 },
   quantity: { min: 1, max: 9999 },
-  /** La BD acepta hasta 2100 (un CHECK debe ser inmutable); aqui acotamos al año real. */
+  /** La BD acepta hasta 2100 (un CHECK debe ser inmutable); aquí acotamos al año real. */
   year: { min: 1900, maxOffsetFromNow: 2 },
 } as const;
 
@@ -27,7 +27,7 @@ export const PROFILE_LIMITS = {
 } as const;
 
 export const PASSWORD_LIMITS = {
-  /** Minimo de Supabase Auth; se configura igual en el dashboard. */
+  /** Mínimo de Supabase Auth; se configura igual en el dashboard. */
   min: 8,
   max: 72,
 } as const;
@@ -42,7 +42,7 @@ export const IMAGE_LIMITS = {
   mimeTypes: ['image/jpeg', 'image/png', 'image/webp'] as const,
 } as const;
 
-/** Año maximo aceptable en el momento de la validacion. */
+/** Año máximo aceptable en el momento de la validación. */
 export function maxCarYear(now: Date = new Date()): number {
   return now.getFullYear() + CAR_LIMITS.year.maxOffsetFromNow;
 }

@@ -20,7 +20,7 @@ export interface Brand {
 
 /**
  * El conteo incrustado llega como `cars: [{ count: n }]`. PostgREST devuelve el
- * array vacio cuando no hay filas que contar, asi que ausencia equivale a cero.
+ * array vacio cuando no hay filas que contar, así que ausencia equivale a cero.
  */
 function toBrand(row: BrandRow): Brand {
   return {
@@ -43,7 +43,7 @@ export async function getBrand(db: DbClient, brandId: string): Promise<Brand> {
   const row = await brandsRepository.findById(db, brandId);
 
   if (!row) {
-    throw AppError.notFound(ERROR_CODES.BRAND_NOT_FOUND, 'No se encontro el fabricante');
+    throw AppError.notFound(ERROR_CODES.BRAND_NOT_FOUND, 'No se encontró el fabricante');
   }
 
   return toBrand(row);
@@ -54,10 +54,10 @@ export async function getBrand(db: DbClient, brandId: string): Promise<Brand> {
  *
  * Se comprueba primero que la marca exista para poder distinguir "esa marca no
  * existe" (404) de "esa marca existe pero no tienes autos suyos" (200 con lista
- * vacia). Sin la comprobacion, los dos casos devolverian lo mismo y la pantalla
- * no podria mostrar un mensaje util.
+ * vacía). Sin la comprobación, los dos casos devolverían lo mismo y la pantalla
+ * no podría mostrar un mensaje útil.
  *
- * El listado lo resuelve el servicio de autos: el contrato de paginacion y el
+ * El listado lo resuelve el servicio de autos: el contrato de paginación y el
  * filtrado por user_id ya viven alli y no tiene sentido duplicarlos.
  */
 export async function listBrandCars(

@@ -6,7 +6,7 @@ import { signExpiredToken, signTestToken } from './helpers/tokens.js';
 const app = createApp();
 
 describe('GET /health', () => {
-  it('responde 200 sin autenticacion', async () => {
+  it('responde 200 sin autenticación', async () => {
     const response = await request(app).get('/health');
 
     expect(response.status).toBe(200);
@@ -61,7 +61,7 @@ describe('requireAuth en GET /api/v1/me', () => {
     expect(response.body.error.code).toBe('AUTH_TOKEN_INVALID');
   });
 
-  it('401 AUTH_TOKEN_EXPIRED si el token caduco, para que el cliente lo refresque', async () => {
+  it('401 AUTH_TOKEN_EXPIRED si el token caducó, para que el cliente lo refresque', async () => {
     const token = await signExpiredToken();
 
     const response = await request(app).get('/api/v1/me').set('Authorization', `Bearer ${token}`);

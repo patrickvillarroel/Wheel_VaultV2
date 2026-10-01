@@ -2,7 +2,7 @@ import type { Response } from 'express';
 import type { ApiErrorDetail, ErrorCode } from '@wheel-vault/shared';
 
 /**
- * Formato unico de respuesta de la API. Ver docs/api.md.
+ * Formato único de respuesta de la API. Ver docs/api.md.
  *
  * Que todo salga por estas dos funciones evita que un endpoint invente su
  * propia forma y que el cliente tenga que manejar varios formatos.

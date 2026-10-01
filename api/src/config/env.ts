@@ -1,8 +1,8 @@
 /**
- * Validacion de variables de entorno al arrancar.
+ * Validación de variables de entorno al arrancar.
  *
  * Si falta un secreto o esta mal formado, el proceso muere de inmediato con un
- * mensaje claro en vez de fallar mas tarde con un error opaco en produccion.
+ * mensaje claro en vez de fallar más tarde con un error opaco en producción.
  * Los valores nunca se imprimen en los logs.
  */
 import 'dotenv/config';
@@ -26,7 +26,7 @@ const envSchema = z.object({
   /**
    * Opcional: solo hace falta si el proyecto de Supabase todavia firma los
    * tokens con el secreto compartido heredado (HS256). Los proyectos nuevos
-   * usan claves asimetricas y se verifican contra el JWKS publico, sin secreto.
+   * usan claves asimetricas y se verifican contra el JWKS público, sin secreto.
    * Ver api/src/config/jwt.ts.
    */
   SUPABASE_JWT_SECRET: z.string().min(1).optional(),

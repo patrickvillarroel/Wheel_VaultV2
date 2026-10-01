@@ -8,6 +8,6 @@ export const meRouter = Router();
 meRouter.get('/', requireAuth, profileController.getMe);
 
 /**
- * GET/PATCH /api/v1/profile llegan en la fase 9. El router se crea aqui mismo
- * cuando toque, reutilizando el service y el repository de este modulo.
+ * GET/PATCH /api/v1/profile llegan en la fase 9. El router se crea aquí mismo
+ * cuando toque, reutilizando el service y el repository de este módulo.
  */

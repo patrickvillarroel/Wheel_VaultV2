@@ -6,7 +6,7 @@ const CREATED_AT = '2026-09-30T12:00:00.000Z';
 const ID = '11111111-1111-4111-8111-111111111111';
 
 describe('cursor', () => {
-  it('va y vuelve sin perder informacion', () => {
+  it('va y vuelve sin perder información', () => {
     const cursor = encodeCursor({ createdAt: CREATED_AT, id: ID });
 
     expect(decodeCursor(cursor)).toEqual({ createdAt: CREATED_AT, id: ID });
@@ -27,7 +27,7 @@ describe('cursor', () => {
     expect(cursor).not.toContain('2026-09-30');
   });
 
-  it('rechaza un cursor que no es base64 valido', () => {
+  it('rechaza un cursor que no es base64 válido', () => {
     expect(() => decodeCursor('%%%no-es-base64%%%')).toThrow(AppError);
   });
 
@@ -48,7 +48,7 @@ describe('cursor', () => {
   it('responde 422, no 500, ante un cursor invalido', () => {
     try {
       decodeCursor('basura');
-      expect.unreachable('deberia haber lanzado');
+      expect.unreachable('debería haber lanzado');
     } catch (error) {
       expect((error as AppError).statusCode).toBe(422);
       expect((error as AppError).code).toBe('VALIDATION_ERROR');
@@ -67,7 +67,7 @@ describe('buildPage', () => {
     id: row.id,
   });
 
-  it('con una fila de mas, recorta y marca has_more', () => {
+  it('con una fila de más, recorta y marca has_more', () => {
     // El repositorio pide limit + 1 para saber si hay siguiente pagina sin
     // lanzar un COUNT aparte.
     const page = buildPage(rows, 3, toCursor);
@@ -77,13 +77,13 @@ describe('buildPage', () => {
     expect(page.meta.next_cursor).not.toBeNull();
   });
 
-  it('el cursor apunta a la ultima fila devuelta, no a la descartada', () => {
+  it('el cursor apunta a la última fila devuelta, no a la descartada', () => {
     const page = buildPage(rows, 3, toCursor);
 
     expect(decodeCursor(page.meta.next_cursor as string).id).toBe(rows[2]?.id);
   });
 
-  it('sin fila de mas, no hay siguiente pagina', () => {
+  it('sin fila de más, no hay siguiente pagina', () => {
     const page = buildPage(rows.slice(0, 3), 3, toCursor);
 
     expect(page.items).toHaveLength(3);
@@ -91,7 +91,7 @@ describe('buildPage', () => {
     expect(page.meta.next_cursor).toBeNull();
   });
 
-  it('una coleccion vacia no rompe nada', () => {
+  it('una colección vacía no rompe nada', () => {
     const page = buildPage([], 20, toCursor);
 
     expect(page.items).toEqual([]);

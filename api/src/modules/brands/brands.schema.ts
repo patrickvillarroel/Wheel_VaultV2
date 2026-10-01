@@ -3,7 +3,7 @@ import { BRAND_LIMITS } from '@wheel-vault/shared';
 import { paginationQuerySchema } from '../../shared/pagination.js';
 
 export const brandIdParamsSchema = z.object({
-  id: z.uuid('El identificador del fabricante no es valido'),
+  id: z.uuid('El identificador del fabricante no es válido'),
 });
 
 export const listBrandsQuerySchema = z.object({
@@ -16,7 +16,7 @@ export const listBrandsQuerySchema = z.object({
     .transform((value) => (value === '' ? undefined : value)),
 });
 
-/** Mismo contrato de paginacion que GET /cars. */
+/** Mismo contrato de paginación que GET /cars. */
 export const brandCarsQuerySchema = paginationQuerySchema.extend({
   sort: z.enum(['recent', 'oldest']).default('recent'),
 });

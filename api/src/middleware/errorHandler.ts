@@ -4,7 +4,7 @@ import { logger } from '../config/logger.js';
 import { AppError } from '../shared/errors/AppError.js';
 import { sendError } from '../shared/http/envelope.js';
 
-/** Ruta inexistente. Va despues de todos los routers. */
+/** Ruta inexistente. Va después de todos los routers. */
 export const notFound: RequestHandler = (req, _res, next) => {
   next(
     AppError.notFound(ERROR_CODES.ROUTE_NOT_FOUND, `La ruta ${req.method} ${req.path} no existe`),
@@ -12,9 +12,9 @@ export const notFound: RequestHandler = (req, _res, next) => {
 };
 
 /**
- * Manejador de errores central. Unico punto por donde sale un error al cliente.
+ * Manejador de errores central. Único punto por donde sale un error al cliente.
  *
- * Regla: lo unico que se envia es `code` y un `message` pensado para una
+ * Regla: lo único que se envia es `code` y un `message` pensado para una
  * persona. El stack trace, el error de Postgres, la ruta del archivo o el
  * detalle de por que fallo la firma de un token se quedan en el log, asociados
  * al `request_id` que si viaja.
@@ -30,7 +30,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
     sendError(res, {
       status: 400,
       code: ERROR_CODES.VALIDATION_ERROR,
-      message: 'El cuerpo de la peticion no es JSON valido',
+      message: 'El cuerpo de la petición no es JSON válido',
       requestId: req.requestId,
     });
     return;
@@ -63,7 +63,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
   }
 
   // Cualquier otra cosa es un fallo no previsto: se registra entero y al
-  // cliente solo le llega un mensaje generico.
+  // cliente solo le llega un mensaje genérico.
   logger.error(
     {
       requestId: req.requestId,

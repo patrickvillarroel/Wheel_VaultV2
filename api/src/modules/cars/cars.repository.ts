@@ -41,11 +41,11 @@ export interface ListParams {
   search?: string | undefined;
   ascending: boolean;
   cursor?: Cursor | undefined;
-  /** El servicio pide una fila de mas para saber si hay pagina siguiente. */
+  /** El servicio pide una fila de más para saber si hay pagina siguiente. */
   limit: number;
 }
 
-/** Codigo de PostgreSQL para violacion de clave foranea. */
+/** Código de PostgreSQL para violacion de clave foranea. */
 const FOREIGN_KEY_VIOLATION = '23503';
 
 function fail(operation: string, error: PostgrestError): never {
@@ -72,7 +72,7 @@ export async function list(db: DbClient, userId: string, params: ListParams): Pr
   }
 
   if (params.cursor) {
-    // Keyset: "las filas posteriores a la ultima que te di". El desempate por
+    // Keyset: "las filas posteriores a la última que te di". El desempate por
     // id evita perder autos creados en el mismo instante.
     const { createdAt, id } = params.cursor;
     const op = params.ascending ? 'gt' : 'lt';
@@ -140,7 +140,7 @@ export async function update(
   return data ?? null;
 }
 
-/** `true` si se borro algo; `false` si no habia nada que borrar. */
+/** `true` si se borro algo; `false` si no había nada que borrar. */
 export async function remove(db: DbClient, userId: string, carId: string): Promise<boolean> {
   const { data, error } = await db
     .from('cars')

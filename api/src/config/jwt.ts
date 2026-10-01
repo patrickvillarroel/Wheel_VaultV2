@@ -10,27 +10,27 @@ import { env } from './env.js';
 import { AppError } from '../shared/errors/AppError.js';
 
 /**
- * Verificacion local del access token que emite Supabase Auth.
+ * Verificación local del access token que emite Supabase Auth.
  *
  * Por que local y no `supabase.auth.getUser(token)`:
  * getUser() hace una llamada de red al servidor de auth en CADA request. Es
  * autoritativo (detecta sesiones revocadas al instante) pero añade latencia a
  * todo y consume el rate limit del servicio. Verificar la firma localmente es
  * lo que recomienda Supabase para el camino normal; el precio es que un token
- * revocado sigue siendo valido hasta su `exp` (1 hora). Es la misma limitacion
+ * revocado sigue siendo válido hasta su `exp` (1 hora). Es la misma limitacion
  * que ya aceptamos en el logout (docs/security.md).
  *
- * Por que dos caminos de verificacion:
+ * Por que dos caminos de verificación:
  * Supabase migro a claves asimetricas (ES256/RS256) publicadas en un JWKS. Los
  * proyectos creados antes del cambio siguen firmando con un secreto compartido
  * (HS256). Soportamos ambos para que el proyecto funcione sin importar cuando
- * se creo, y para que la migracion a asimetricas no rompa nada.
+ * se creo, y para que la migración a asimetricas no rompa nada.
  */
 
 const issuer = `${env.SUPABASE_URL.replace(/\/+$/, '')}/auth/v1`;
 
 /**
- * `createRemoteJWKSet` cachea las claves publicas en memoria y solo vuelve a
+ * `createRemoteJWKSet` cachea las claves públicas en memoria y solo vuelve a
  * pedirlas cuando aparece un `kid` desconocido (rotacion de claves).
  */
 const remoteJwks = createRemoteJWKSet(new URL(`${issuer}/.well-known/jwks.json`));
@@ -49,13 +49,13 @@ export async function verifyAccessToken(token: string): Promise<AuthenticatedUse
   try {
     header = decodeProtectedHeader(token);
   } catch {
-    throw AppError.unauthorized(ERROR_CODES.AUTH_TOKEN_INVALID, 'El token no es valido');
+    throw AppError.unauthorized(ERROR_CODES.AUTH_TOKEN_INVALID, 'El token no es válido');
   }
 
   let payload: JWTPayload;
   try {
-    // `issuer` y `audience` no son opcionales: sin ellos, un token valido de
-    // OTRO proyecto de Supabase seria aceptado por el nuestro.
+    // `issuer` y `audience` no son opcionales: sin ellos, un token válido de
+    // OTRO proyecto de Supabase sería aceptado por el nuestro.
     const options = { issuer, audience: 'authenticated' };
 
     if (header.alg === 'HS256') {
@@ -73,11 +73,11 @@ export async function verifyAccessToken(token: string): Promise<AuthenticatedUse
     if (error instanceof AppError) throw error;
 
     if (error instanceof joseErrors.JWTExpired) {
-      throw AppError.unauthorized(ERROR_CODES.AUTH_TOKEN_EXPIRED, 'La sesion ha expirado');
+      throw AppError.unauthorized(ERROR_CODES.AUTH_TOKEN_EXPIRED, 'La sesión ha expirado');
     }
     throw AppError.unauthorized(
       ERROR_CODES.AUTH_TOKEN_INVALID,
-      'El token no es valido',
+      'El token no es válido',
       // Solo para los logs: el motivo real nunca sale al cliente.
       error instanceof Error ? error.message : 'error desconocido',
     );

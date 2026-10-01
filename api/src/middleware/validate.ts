@@ -15,10 +15,10 @@ interface Schemas {
  * El resultado se guarda en `req.validated`, no se reasigna sobre `req.query`:
  * en Express 5 esa propiedad es de solo lectura.
  *
- * Importante: lo que se usa despues es SIEMPRE el dato validado, nunca el
- * original. Zod no solo comprueba, tambien recorta el objeto a los campos
- * declarados, asi que un campo de mas enviado por un cliente malicioso
- * (`"user_id": "..."`) desaparece aqui.
+ * Importante: lo que se usa después es SIEMPRE el dato validado, nunca el
+ * original. Zod no solo comprueba, también recorta el objeto a los campos
+ * declarados, así que un campo de más enviado por un cliente malicioso
+ * (`"user_id": "..."`) desaparece aquí.
  */
 export function validate(schemas: Schemas): RequestHandler {
   return (req, _res, next) => {
@@ -44,7 +44,7 @@ export function validate(schemas: Schemas): RequestHandler {
     }
 
     if (details.length > 0) {
-      next(AppError.validation('Los datos enviados no son validos', details));
+      next(AppError.validation('Los datos enviados no son válidos', details));
       return;
     }
 

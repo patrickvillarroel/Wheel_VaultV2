@@ -26,7 +26,7 @@ function shutdown(signal: string): void {
     process.exit(0);
   });
 
-  // Si alguna conexion se queda colgada, no esperamos indefinidamente.
+  // Si alguna conexión se queda colgada, no esperamos indefinidamente.
   setTimeout(() => {
     logger.error('Cierre forzado tras 10s de espera');
     process.exit(1);
@@ -42,6 +42,6 @@ process.on('unhandledRejection', (reason) => {
 });
 
 process.on('uncaughtException', (error) => {
-  logger.fatal({ err: error }, 'Excepcion no capturada');
+  logger.fatal({ err: error }, 'Excepción no capturada');
   process.exit(1);
 });
