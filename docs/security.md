@@ -132,6 +132,22 @@ que el id existe y filtra información.
 
 `rls_isolation.sql` se vuelve a ejecutar **cada vez que se toca una policy**.
 
+## Vulnerabilidades aceptadas (y por qué)
+
+`npm audit` reporta **14 moderadas**, todas transitivas del propio toolchain de
+Expo. `npm audit fix --force` las "arregla" degradando `expo-router` a una
+versión incompatible con el SDK 57, es decir, rompiendo el proyecto. No se hace.
+
+| Cadena | Dónde vive | Riesgo real |
+|---|---|---|
+| `decode-uri-component` ← `query-string` ← `expo-router` | En la app | DoS al parsear un deep link malformado. Afecta a la app del propio usuario, no al servidor |
+| `uuid` ← `xcode` ← `@expo/config-plugins` | Solo build (`prebuild` de iOS) | No viaja en el bundle |
+
+Se revisa cuando Expo publique una versión que suba esas dependencias. Anotado
+en la lista de la fase 10.
+
+`api/` y `shared/` están en **0 vulnerabilidades**.
+
 ## Pendientes antes de producción (fase 10)
 
 - [ ] Proveedor SMTP propio: el correo del plan Free es solo para pruebas
@@ -140,4 +156,5 @@ que el id existe y filtra información.
 - [ ] Proyecto Supabase separado para producción, con claves distintas
 - [ ] Revisar `scope: 'global'` en el logout
 - [ ] Rate limiting por usuario además de por IP
+- [ ] Revisar las 14 vulnerabilidades transitivas de Expo cuando el SDK las suba
 - [ ] Repaso de los mensajes de error visibles al usuario

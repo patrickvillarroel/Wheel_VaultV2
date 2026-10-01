@@ -3,9 +3,10 @@
 App móvil para administrar una colección de carros a escala. Cada usuario tiene
 su propio inventario y solo puede ver y modificar lo que le pertenece.
 
-> **Estado actual: fases 0, 1, 2, 5 y 7 completadas** — fundaciones, base de
-> datos con RLS, núcleo del backend y API de autos y marcas. La app móvil
-> llega en la fase 3.
+> **Estado actual: fases 0–5 y 7 completadas** — fundaciones, base de datos con
+> RLS, backend completo (auth, autos, marcas) y la app móvil con su design
+> system y el flujo de autenticación. Quedan el inventario (fase 6), las fotos
+> (5.5), la Home (8), el perfil (9) y el endurecimiento (10).
 > Roadmap completo en [docs/architecture.md](docs/architecture.md).
 
 ## Stack
@@ -22,7 +23,7 @@ su propio inventario y solo puede ver y modificar lo que le pertenece.
 ```
 .
 ├─ api/          Backend Express (TypeScript)
-├─ mobile/       App React Native + Expo       ← se genera en la fase 3
+├─ mobile/       App React Native + Expo (SDK 57)
 ├─ shared/       Límites de validación y códigos de error compartidos
 ├─ supabase/
 │  ├─ migrations/   Esquema de la base de datos (SQL)
@@ -69,6 +70,7 @@ curl http://localhost:4000/health
 | Comando | Qué hace |
 |---|---|
 | `npm run dev:api` | Levanta la API en modo watch |
+| `npm run dev:mobile` | Arranca Expo (móvil y web) |
 | `npm run build` | Compila `shared` y `api` |
 | `npm run typecheck` | Comprueba los tipos de todos los workspaces |
 | `npm run lint` · `npm run lint:fix` | ESLint |

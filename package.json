@@ -5,7 +5,8 @@
   "description": "Collector's Project — app para administrar una coleccion de carros a escala",
   "workspaces": [
     "shared",
-    "api"
+    "api",
+    "mobile"
   ],
   "engines": {
     "node": ">=20"
@@ -14,20 +15,21 @@
     "dev:api": "npm run dev --workspace=api",
     "build": "npm run build --workspace=shared && npm run build --workspace=api",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint . && npm run lint --workspace=mobile",
+    "lint:fix": "eslint . --fix && npm run lint --workspace=mobile -- --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
     "db:types": "node scripts/gen-types.mjs",
-    "smoke": "node scripts/smoke-test.mjs"
+    "smoke": "node scripts/smoke-test.mjs",
+    "dev:mobile": "npm run start --workspace=mobile"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.9",
-    "typescript": "^5.9.3",
+    "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.0"
   }
 }

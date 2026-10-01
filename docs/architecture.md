@@ -79,24 +79,25 @@ carpeta, no seis. Las capas siguen existiendo, solo que colocadas juntas.
 ## Estructura del frontend
 
 ```
-mobile/
+mobile/src/
 ├─ app/                      Expo Router — solo rutas, archivos finos
 │  ├─ _layout.tsx            providers + gate de sesión
 │  ├─ (auth)/                login · register · forgot-password · reset-password
 │  ├─ (tabs)/                _layout · index (Home) · collection · more
-│  ├─ car/[id].tsx · car/new.tsx · car/[id]/edit.tsx
-│  ├─ brands/index.tsx · brands/[id].tsx
-│  └─ profile/index.tsx · profile/edit.tsx
-└─ src/
-   ├─ features/              auth/ cars/ brands/ profile/
-   │                         └ api.ts · hooks.ts · schema.ts · components/
-   ├─ components/ui/         Button · Input · Card · EmptyState · ErrorState
-   │                         Skeleton · SectionHeader · ConfirmDialog
-   ├─ lib/                   supabase.ts · apiClient.ts · queryClient.ts
-   ├─ theme/                 colors · typography · spacing · radii
-   ├─ hooks/ · utils/ · constants/ · types/
-   └─ config/                env.ts
+│  ├─ car/[id].tsx · car/new.tsx · car/[id]/edit.tsx        (fase 6)
+│  └─ brands/index.tsx · brands/[id].tsx                    (fase 7)
+├─ features/                 auth/ profile/ — y cars/ brands/ al llegar su fase
+│                            └ api.ts · hooks.ts · schemas.ts · components/
+├─ components/ui/            Button · TextField · Screen · Banner
+│                            AuthLayout · Wordmark · Placeholder
+├─ lib/                      supabase.ts · apiClient.ts · queryClient.ts
+├─ theme/                    tokens: colores, tipografía, espaciado, radios
+└─ config/                   env.ts
 ```
+
+> `app/` vive dentro de `src/`, que es donde lo pone la plantilla actual de
+> Expo. La propuesta inicial lo situaba en la raíz; la diferencia es puramente
+> de ubicación y no cambia nada del diseño.
 
 - **Estado del servidor**: TanStack Query. Estado global propio solo para la
   sesión (Context). Sin Redux: no hay estado cliente que lo justifique.
@@ -128,8 +129,8 @@ en la base de datos, así que no habrá migración.
 | 0 | Fundaciones: monorepo, TS estricto, lint, env, docs | ✅ |
 | 1 | Base de datos: tablas, constraints, índices, triggers, RLS, catálogo | ✅ |
 | 2 | Backend core: helmet/cors/rate-limit, requireAuth, validate, errorHandler, `/me` | ✅ |
-| 3 | Auth móvil: SecureStore, AuthContext, login/registro/reset, gate de rutas | ⬜ |
-| 4 | Design system: tokens y componentes base del Figma | ⬜ |
+| 3 | Auth móvil: SecureStore, AuthContext, login/registro/reset, gate de rutas | ✅ |
+| 4 | Design system: tokens y componentes base del Figma | ✅ |
 | 5 | Cars API: CRUD, paginación keyset, filtros, tests de autorización | ✅ |
 | 5.5 | Fotos: Storage, subida, compresión, URLs firmadas | ⬜ |
 | 6 | Inventario UI: lista, detalle, crear, editar, borrar, estados | ⬜ |
