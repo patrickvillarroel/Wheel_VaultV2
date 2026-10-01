@@ -18,7 +18,7 @@ export function Wordmark({ size = 'large' }: { size?: 'large' | 'small' }) {
     <View style={styles.root} accessibilityRole="header" accessibilityLabel="Collector's Project">
       <Image
         source={require('../../../assets/images/Velocimetro.png')}
-        style={{ width: 150 * scale, height: 99 * scale }}
+        style={{ width: 100 * scale, height: 69 * scale }}
         contentFit="contain"
         // El texto de al lado ya describe el logotipo; anunciarlo otra vez
         // sería ruido para un lector de pantalla.
