@@ -78,6 +78,21 @@ Express responde 401 AUTH_TOKEN_EXPIRED
 
 **Logout**: `signOut({ scope: 'local' })` + purga del cache de TanStack Query.
 
+### Verificación del token en Express
+
+Se verifica **localmente** la firma (`api/src/config/jwt.ts`), no con
+`supabase.auth.getUser(token)`. Esa alternativa es autoritativa — detecta
+sesiones revocadas al instante — pero añade una llamada de red en **cada**
+request y consume el rate limit del servicio de auth.
+
+Además de la firma se comprueban `exp`, `iss` y `aud`. El `issuer` no es
+opcional: sin él, un token perfectamente válido emitido por **otro proyecto de
+Supabase** sería aceptado por el nuestro.
+
+Se soportan los dos esquemas de firma: claves asimétricas vía JWKS (lo que usan
+los proyectos nuevos) y el secreto compartido HS256 heredado. Así el proyecto
+funciona sin importar cuándo se creó, y migrar a asimétricas no rompe nada.
+
 > Limitación conocida y aceptada: tras un logout local, el access token sigue
 > siendo criptográficamente válido hasta su `exp` (1 h). Para invalidarlo de
 > inmediato en todos los dispositivos hace falta `scope: 'global'`. Se evalúa en
@@ -101,8 +116,10 @@ que el id existe y filtra información.
 | A no puede crear ni reasignar un auto a nombre de B | mismo archivo | ✅ 1 |
 | El catálogo global de marcas es de solo lectura | mismo archivo | ✅ 1 |
 | B no puede leer el perfil de A | mismo archivo | ✅ 1 |
-| Mismos casos a través de la API HTTP | `api/tests/` | 5 |
-| `requireAuth`: sin token, expirado, firma alterada | `api/tests/` | 2 |
+| `requireAuth`: sin token, mal formado, basura, firmado con otra clave, caducado | `api/tests/app.test.ts` | ✅ 2 |
+| JWT: issuer de otro proyecto, audiencia distinta, sin `sub`, motivo interno no filtrado | `api/tests/jwt.test.ts` | ✅ 2 |
+| Zod descarta campos no declarados (p. ej. un `user_id` inyectado en el body) | `api/tests/validate.test.ts` | ✅ 2 |
+| Mismos casos de aislamiento a través de la API HTTP | `api/tests/` | 5 |
 | Zod: cantidad < 1, año inválido, texto fuera de límite, UUID malformado | `api/tests/` | 5 |
 
 `rls_isolation.sql` se vuelve a ejecutar **cada vez que se toca una policy**.

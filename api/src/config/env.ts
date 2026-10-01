@@ -14,8 +14,22 @@ const envSchema = z.object({
 
   SUPABASE_URL: z.url(),
   SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  SUPABASE_JWT_SECRET: z.string().min(1),
+
+  /**
+   * Opcional a proposito: la API NO lo necesita. Express consulta Supabase con
+   * la anon key y el JWT del usuario, para que la RLS siga aplicando (ADR-002).
+   * Solo lo usan los scripts administrativos. Cuanto menos exista este secreto
+   * en el entorno del servidor, menos sitios desde donde se puede filtrar.
+   */
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+
+  /**
+   * Opcional: solo hace falta si el proyecto de Supabase todavia firma los
+   * tokens con el secreto compartido heredado (HS256). Los proyectos nuevos
+   * usan claves asimetricas y se verifican contra el JWKS publico, sin secreto.
+   * Ver api/src/config/jwt.ts.
+   */
+  SUPABASE_JWT_SECRET: z.string().min(1).optional(),
 
   CORS_ORIGINS: z
     .string()
@@ -50,3 +64,6 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 export type Env = typeof env;
+
+export const isProduction = env.NODE_ENV === 'production';
+export const isTest = env.NODE_ENV === 'test';

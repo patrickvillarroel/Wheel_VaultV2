@@ -127,7 +127,7 @@ en la base de datos, así que no habrá migración.
 |---|---|---|
 | 0 | Fundaciones: monorepo, TS estricto, lint, env, docs | ✅ |
 | 1 | Base de datos: tablas, constraints, índices, triggers, RLS, catálogo | ✅ |
-| 2 | Backend core: helmet/cors/rate-limit, requireAuth, validate, errorHandler, `/me` | ⬜ |
+| 2 | Backend core: helmet/cors/rate-limit, requireAuth, validate, errorHandler, `/me` | ✅ |
 | 3 | Auth móvil: SecureStore, AuthContext, login/registro/reset, gate de rutas | ⬜ |
 | 4 | Design system: tokens y componentes base del Figma | ⬜ |
 | 5 | Cars API: CRUD, paginación keyset, filtros, tests de autorización | ⬜ |

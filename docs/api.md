@@ -3,8 +3,8 @@
 Base: `/api/v1`. Todas las rutas requieren `Authorization: Bearer <access_token>`
 salvo `/health`.
 
-> **Estado**: diseño aprobado. La implementación llega en las fases 2, 5, 7, 8 y
-> 9. Hoy solo existe `/health`.
+> **Estado**: `/health` y `/me` implementados (fase 2). `/cars` llega en la fase 5,
+> `/brands` en la 7, `/stats/summary` en la 8 y `/profile` en la 9.
 
 ## Autenticación
 
