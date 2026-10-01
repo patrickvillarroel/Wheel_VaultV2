@@ -294,6 +294,45 @@ describe('PATCH /api/v1/cars/:id', () => {
     expect(carsRepository.update).not.toHaveBeenCalled();
   });
 
+  it('acepta la ruta de imagen que corresponde a ese auto', async () => {
+    vi.mocked(carsRepository.update).mockResolvedValue(car);
+
+    const response = await authed('patch', `/api/v1/cars/${CAR_ID}`).send({
+      image_path: `${TEST_USER_ID}/${CAR_ID}.jpg`,
+    });
+
+    expect(response.status).toBe(200);
+  });
+
+  it('422 si la ruta de imagen apunta a la carpeta de otro usuario', async () => {
+    // Las policies de Storage impedirían leer el archivo, pero aquí se corta
+    // antes: la ruta la decide el servidor, no el cliente.
+    const response = await authed('patch', `/api/v1/cars/${CAR_ID}`).send({
+      image_path: `${OTHER_USER_ID}/${CAR_ID}.jpg`,
+    });
+
+    expect(response.status).toBe(422);
+    expect(response.body.error.details[0].field).toBe('body.image_path');
+    expect(carsRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('422 si la ruta de imagen apunta a otro auto del mismo usuario', async () => {
+    const response = await authed('patch', `/api/v1/cars/${CAR_ID}`).send({
+      image_path: `${TEST_USER_ID}/44444444-4444-4444-8444-444444444444.jpg`,
+    });
+
+    expect(response.status).toBe(422);
+    expect(carsRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('permite quitar la imagen enviando null', async () => {
+    vi.mocked(carsRepository.update).mockResolvedValue(car);
+
+    await authed('patch', `/api/v1/cars/${CAR_ID}`).send({ image_path: null });
+
+    expect(vi.mocked(carsRepository.update).mock.calls[0]?.[3]).toEqual({ image_path: null });
+  });
+
   it('404 si se intenta mover el auto a un fabricante no visible', async () => {
     vi.mocked(brandsRepository.findVisibleById).mockResolvedValue(null);
 

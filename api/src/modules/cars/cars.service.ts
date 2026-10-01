@@ -76,6 +76,10 @@ export async function updateCar(
     await assertBrandIsVisible(db, input.brand_id);
   }
 
+  if (input.image_path) {
+    assertImagePathBelongsToCar(input.image_path, userId, carId);
+  }
+
   // Solo viajan a la base de datos los campos realmente enviados. Sin este
   // filtro, un PATCH que no menciona `description` la pondria a NULL: en un
   // PATCH, ausente significa "no lo toques" y null significa "borralo".
@@ -108,6 +112,23 @@ export async function deleteCar(db: DbClient, userId: string, carId: string): Pr
  * de otra persona —acertando el UUID— y quedarse con un auto cuya marca no
  * puede leer.
  */
+/**
+ * La ruta de la imagen la envía el cliente tras subirla a Storage, pero aquí no
+ * se acepta cualquier valor: tiene que ser exactamente la del propio auto.
+ *
+ * Sin esta comprobación un usuario podría apuntar su registro a la carpeta de
+ * otra persona. Las policies de Storage impedirían leer el archivo, así que no
+ * habría fuga, pero la base de datos quedaría con referencias cruzadas que no
+ * deberían existir. La ruta la decide el servidor, no el cliente.
+ */
+function assertImagePathBelongsToCar(imagePath: string, userId: string, carId: string): void {
+  if (imagePath !== `${userId}/${carId}.jpg`) {
+    throw AppError.validation('La ruta de la imagen no es válida', [
+      { field: 'body.image_path', message: 'No corresponde a este auto' },
+    ]);
+  }
+}
+
 async function assertBrandIsVisible(db: DbClient, brandId: string): Promise<void> {
   const brand = await brandsRepository.findVisibleById(db, brandId);
 
