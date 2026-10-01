@@ -1,0 +1,32 @@
+{
+  "name": "wheel-vault",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Collector's Project — app para administrar una coleccion de carros a escala",
+  "workspaces": [
+    "shared",
+    "api"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:api": "npm run dev --workspace=api",
+    "build": "npm run build --workspace=shared && npm run build --workspace=api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "db:types": "supabase gen types typescript --linked > api/src/types/database.types.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.0"
+  }
+}
