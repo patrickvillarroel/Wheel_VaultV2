@@ -3,9 +3,9 @@
 App móvil para administrar una colección de carros a escala. Cada usuario tiene
 su propio inventario y solo puede ver y modificar lo que le pertenece.
 
-> **Estado actual: fases 0 y 1 completadas** (fundaciones + base de datos).
-> La API y la app móvil llegan en las siguientes fases. Roadmap completo en
-> [docs/architecture.md](docs/architecture.md).
+> **Estado actual: fases 0, 1, 2 y 5 completadas** — fundaciones, base de datos
+> con RLS, núcleo del backend y API de autos. La app móvil llega en la fase 3.
+> Roadmap completo en [docs/architecture.md](docs/architecture.md).
 
 ## Stack
 
@@ -28,6 +28,7 @@ su propio inventario y solo puede ver y modificar lo que le pertenece.
 │  └─ tests/        Pruebas de aislamiento entre usuarios (RLS)
 └─ docs/
    ├─ supabase-setup.md   Guía de Supabase desde cero
+   ├─ probar-la-api.md    Cómo verificar la API a mano con curl
    ├─ architecture.md     Arquitectura y roadmap
    ├─ database.md         Modelo de datos, índices y policies
    ├─ security.md         Controles de seguridad

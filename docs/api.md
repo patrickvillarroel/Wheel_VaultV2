@@ -3,8 +3,8 @@
 Base: `/api/v1`. Todas las rutas requieren `Authorization: Bearer <access_token>`
 salvo `/health`.
 
-> **Estado**: `/health` y `/me` implementados (fase 2). `/cars` llega en la fase 5,
-> `/brands` en la 7, `/stats/summary` en la 8 y `/profile` en la 9.
+> **Estado**: `/health`, `/me` (fase 2) y `/cars` (fase 5) implementados.
+> `/brands` llega en la fase 7, `/stats/summary` en la 8 y `/profile` en la 9.
 
 ## Autenticación
 
@@ -18,7 +18,7 @@ Añadir endpoints espejo solo agregaría un salto de red y superficie de ataque.
 |---|---|---|
 | `GET` | `/health` | Sin auth. Para el healthcheck del hosting |
 | `GET` | `/me` | Sesión + perfil en una sola llamada (evita doble request al arrancar) |
-| `GET` | `/cars` | Lista paginada. `?limit=&cursor=&brand_id=&q=&sort=recent\|name` |
+| `GET` | `/cars` | Lista paginada. `?limit=&cursor=&brand_id=&q=&sort=recent\|oldest` |
 | `POST` | `/cars` | Crea. `201` + header `Location` |
 | `GET` | `/cars/:id` | Detalle |
 | `PATCH` | `/cars/:id` | Actualización **parcial** |
@@ -97,6 +97,20 @@ GET /api/v1/cars?limit=20&cursor=eyJjIjoiMjAyNi0wOS0zMFQxMjowMDowMFoiLCJpIjoiLi4
 ```
 
 `limit` por defecto 20, máximo 50 (`PAGINATION` en `shared/src/limits.ts`).
+
+El cursor incluye `created_at` **y** `id`: dos autos creados en el mismo
+milisegundo empatarían y uno se perdería entre páginas.
+
+No es un secreto ni un control de acceso. Manipularlo solo permite empezar a
+paginar desde otro punto de los datos **del propio usuario**, porque la consulta
+sigue filtrando por `user_id` y la RLS sigue activa. Se valida para responder un
+422 claro en lugar de producir una consulta extraña.
+
+**`sort` solo acepta `recent` y `oldest`.** Ordenar por nombre necesita un
+cursor compuesto sobre `(model, id)`, y el modelo es texto libre del usuario:
+construir ese filtro obliga a escapar comas, paréntesis y comillas dentro de la
+sintaxis `or=()` de PostgREST, y equivocarse ahí es un fallo de filtrado. Ninguna
+pantalla del diseño lo pide, así que entrará junto a la función de búsqueda.
 
 Con offset, la página 50 obliga a Postgres a leer y descartar 1 000 filas, y si
 se inserta un auto mientras paginas, los elementos se duplican o se saltan. El

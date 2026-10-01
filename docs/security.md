@@ -119,8 +119,13 @@ que el id existe y filtra información.
 | `requireAuth`: sin token, mal formado, basura, firmado con otra clave, caducado | `api/tests/app.test.ts` | ✅ 2 |
 | JWT: issuer de otro proyecto, audiencia distinta, sin `sub`, motivo interno no filtrado | `api/tests/jwt.test.ts` | ✅ 2 |
 | Zod descarta campos no declarados (p. ej. un `user_id` inyectado en el body) | `api/tests/validate.test.ts` | ✅ 2 |
-| Mismos casos de aislamiento a través de la API HTTP | `api/tests/` | 5 |
-| Zod: cantidad < 1, año inválido, texto fuera de límite, UUID malformado | `api/tests/` | 5 |
+| El `user_id` de toda operación sobre `cars` sale del token, nunca del body ni de la query | `api/tests/cars.api.test.ts` | ✅ 5 |
+| Las 5 rutas de `/cars` exigen token | `api/tests/cars.api.test.ts` | ✅ 5 |
+| Un auto ajeno responde 404, no 403 (un 403 confirmaría que el id existe) | `api/tests/cars.api.test.ts` | ✅ 5 |
+| No se puede asignar un auto a un fabricante privado de otro usuario | `api/tests/cars.api.test.ts` | ✅ 5 |
+| Un cursor manipulado da 422 y no llega a consultar | `api/tests/pagination.test.ts` | ✅ 5 |
+| Zod: cantidad < 1, año inválido, texto fuera de límite, UUID malformado | `api/tests/cars.schema.test.ts` | ✅ 5 |
+| Mismos casos de aislamiento contra una base de datos real, vía HTTP | pendiente | 10 |
 
 `rls_isolation.sql` se vuelve a ejecutar **cada vez que se toca una policy**.
 

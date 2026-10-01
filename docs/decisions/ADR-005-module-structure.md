@@ -36,7 +36,18 @@ Route → Middleware → Controller → Service → Repository → Database
 ## Consecuencias
 
 - `middleware/`, `config/` y `shared/` siguen siendo transversales.
-- Lo compartido entre módulos (paginación, envelope de errores, `AppError`) vive
-  en `src/shared/`, nunca se importa de un módulo a otro.
+- Las **utilidades** compartidas (paginación, envelope de errores, `AppError`)
+  viven en `src/shared/`, nunca dentro de un módulo.
+- La **composición de dominio entre módulos sí está permitida**, en una sola
+  dirección: el *service* de un módulo puede usar el *repository* de otro.
+  Ejemplo real: `cars.service` consulta `brands.repository` para comprobar que
+  el fabricante existe y es visible antes de insertar.
+  Lo que no se hace es llamar al *controller* o a las *rutas* de otro módulo:
+  eso sería acoplarse a su capa HTTP.
+
+  > Redacción corregida el 2026-09-30. La versión original decía que un módulo
+  > "nunca se importa de otro", lo que habría obligado a duplicar la consulta de
+  > marcas dentro de `cars` o a mover lógica de dominio a `shared/`. La
+  > intención era hablar de utilidades, no de dominio.
 - Si el proyecto creciera a decenas de módulos, el siguiente paso natural es
   extraerlos a paquetes del workspace, no volver a la organización por capas.

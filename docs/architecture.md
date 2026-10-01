@@ -130,7 +130,7 @@ en la base de datos, así que no habrá migración.
 | 2 | Backend core: helmet/cors/rate-limit, requireAuth, validate, errorHandler, `/me` | ✅ |
 | 3 | Auth móvil: SecureStore, AuthContext, login/registro/reset, gate de rutas | ⬜ |
 | 4 | Design system: tokens y componentes base del Figma | ⬜ |
-| 5 | Cars API: CRUD, paginación keyset, filtros, tests de autorización | ⬜ |
+| 5 | Cars API: CRUD, paginación keyset, filtros, tests de autorización | ✅ |
 | 5.5 | Fotos: Storage, subida, compresión, URLs firmadas | ⬜ |
 | 6 | Inventario UI: lista, detalle, crear, editar, borrar, estados | ⬜ |
 | 7 | Brands: API + pantallas + conteos | ⬜ |
