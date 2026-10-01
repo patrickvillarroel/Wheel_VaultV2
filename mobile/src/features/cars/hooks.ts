@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-query';
 import type { Paginated } from '../../lib/apiClient';
 import { brandKeys } from '../brands/hooks';
+import { statsKeys } from '../stats/hooks';
 import * as carsApi from './api';
 import type { Car, ListCarsParams } from './api';
 
@@ -52,9 +53,9 @@ export function useCar(id: string) {
 }
 
 /**
- * Tras crear, editar o borrar hay que invalidar también las marcas: su
- * `car_count` acaba de cambiar y si no, la pantalla de Marcas muestra un número
- * viejo.
+ * Tras crear, editar o borrar hay que invalidar también las marcas y el
+ * resumen: el `car_count` de la marca y los totales de la pantalla de inicio
+ * acaban de cambiar, y si no se tocan ambas pantallas muestran números viejos.
  */
 function useInvalidateAfterWrite() {
   const queryClient = useQueryClient();
@@ -62,6 +63,7 @@ function useInvalidateAfterWrite() {
   return () => {
     void queryClient.invalidateQueries({ queryKey: carKeys.lists() });
     void queryClient.invalidateQueries({ queryKey: brandKeys.all });
+    void queryClient.invalidateQueries({ queryKey: statsKeys.summary });
   };
 }
 

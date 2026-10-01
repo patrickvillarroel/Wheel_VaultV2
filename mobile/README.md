@@ -57,16 +57,23 @@ src/
 
 ## Si el typecheck falla con rutas
 
-`expo-router` genera los tipos de las rutas en `.expo/types/router.d.ts` cuando
-arranca Metro. Si el archivo se queda desfasado —por ejemplo tras renombrar o
-borrar una pantalla— `npm run typecheck` se queja de rutas que sí existen:
+`expo-router` genera los tipos de las rutas en `.expo/types/router.d.ts`, y solo
+los regenera **cuando arranca Metro**. Si añades, renombras o borras una
+pantalla con Metro parado, el archivo queda desfasado y `npm run typecheck`
+protesta por rutas que sí existen, con un mensaje que no da ninguna pista:
 
-```bash
-rm -rf mobile/.expo/types
+```
+Type '"/car/[id]"' is not assignable to type 'RelativePathString | ...'
 ```
 
-y vuelve a arrancar `npm run dev:mobile`, que lo regenera. Sin el archivo el
-typecheck también pasa, solo que sin comprobar las rutas.
+Es una caché, no una fuente de verdad. Se borra y listo:
+
+```bash
+npm run clean:routes --workspace=mobile
+```
+
+Sin ese archivo el typecheck pasa igual, solo que sin comprobar las rutas; la
+siguiente vez que arranques `npm run dev:mobile` se regenera correcto.
 
 ## Pendiente de diseño
 

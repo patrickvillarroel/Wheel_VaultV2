@@ -65,7 +65,7 @@ export default function CollectionScreen() {
     if (total === 0) {
       return (
         <EmptyState
-          icon="car-sport-outline"
+          illustration={require('../../../assets/images/no_inventory_load.png')}
           title="Tu colección está vacía"
           description="Agrega tu primer carrito para comenzar."
           actionLabel="Agregar carrito"

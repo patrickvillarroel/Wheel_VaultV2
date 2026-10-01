@@ -28,7 +28,7 @@ export function BrandPicker({
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
 
-  const { data: brands, isLoading, isError, refetch } = useBrands();
+  const { data: brands, isLoading, isError, error: loadError, refetch } = useBrands();
 
   const selected = brands?.find((brand) => brand.id === value) ?? null;
 
@@ -100,7 +100,12 @@ export function BrandPicker({
           {isLoading ? (
             <LoadingState />
           ) : isError ? (
-            <ErrorState message="No se pudo cargar el catálogo" onRetry={() => void refetch()} />
+            <ErrorState
+              message={
+                loadError instanceof Error ? loadError.message : 'No se pudo cargar el catálogo'
+              }
+              onRetry={() => void refetch()}
+            />
           ) : (
             <FlatList
               data={filtered}

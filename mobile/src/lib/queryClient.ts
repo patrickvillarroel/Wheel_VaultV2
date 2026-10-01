@@ -13,8 +13,14 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 30_000,
       retry: (failureCount, error) => {
-        if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
-          return false;
+        if (error instanceof ApiError) {
+          // Un 4xx no va a cambiar por insistir.
+          if (error.status >= 400 && error.status < 500) return false;
+
+          // Un fallo de red sí puede ser pasajero, pero cada intento consume el
+          // timeout completo: con tres, la pantalla tarda más de medio minuto
+          // en decir qué pasó. Uno de más es suficiente.
+          if (error.code === 'NETWORK_ERROR') return failureCount < 1;
         }
         return failureCount < 2;
       },

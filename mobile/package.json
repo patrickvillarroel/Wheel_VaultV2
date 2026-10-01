@@ -51,7 +51,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean:routes": "node -e \"require('node:fs').rmSync('.expo/types/router.d.ts', { force: true })\""
   },
   "private": true
 }

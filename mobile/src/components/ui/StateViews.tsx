@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image, type ImageSource } from 'expo-image';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { colors, radii, spacing, typography } from '../../theme';
 import { Button } from './Button';
@@ -22,12 +23,16 @@ export function LoadingState({ label }: { label?: string }) {
 
 export function EmptyState({
   icon,
+  illustration,
   title,
   description,
   actionLabel,
   onAction,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  /** Marcador genérico. Se ignora si hay `illustration`. */
+  icon?: keyof typeof Ionicons.glyphMap;
+  /** Ilustración propia del diseño; tiene prioridad sobre el icono. */
+  illustration?: ImageSource | number;
   title: string;
   description: string;
   actionLabel?: string;
@@ -35,9 +40,21 @@ export function EmptyState({
 }) {
   return (
     <View style={styles.center}>
-      <View style={styles.iconCircle}>
-        <Ionicons name={icon} size={36} color={colors.textMuted} />
-      </View>
+      {illustration !== undefined ? (
+        <Image
+          source={illustration}
+          style={styles.illustration}
+          contentFit="contain"
+          // Decorativa: el título y la descripción que van debajo ya dicen lo
+          // que pasa, y repetirlo sería ruido para un lector de pantalla.
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        />
+      ) : icon ? (
+        <View style={styles.iconCircle}>
+          <Ionicons name={icon} size={36} color={colors.textMuted} />
+        </View>
+      ) : null}
 
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
@@ -84,6 +101,12 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingHorizontal: spacing.xxxl,
     paddingVertical: spacing.huge,
+  },
+  illustration: {
+    // El recurso mide 218x178; a este tamaño se ve nítido sin ampliarlo.
+    width: 140,
+    height: 114,
+    marginBottom: spacing.sm,
   },
   iconCircle: {
     width: 80,

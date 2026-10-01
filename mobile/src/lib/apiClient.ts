@@ -56,34 +56,103 @@ interface RequestOptions {
 }
 
 /**
+ * Sin límite de tiempo, una petición a un host inalcanzable se queda esperando
+ * el timeout de TCP del sistema —que en Android puede pasar del minuto— y la
+ * pantalla parece colgada en vez de dar un error.
+ */
+const REQUEST_TIMEOUT_MS = 12_000;
+const SESSION_TIMEOUT_MS = 8_000;
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(
+          () => reject(new ApiError({ status: 0, code: 'NETWORK_ERROR', message })),
+          ms,
+        );
+      }),
+    ]);
+  } finally {
+    // Si gana la promesa real, el temporizador sigue vivo y mantiene despierto
+    // el bucle de eventos hasta que salte.
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * En desarrollo el mensaje incluye la URL que se intentó.
+ *
+ * Es, con diferencia, el fallo más habitual al montar el entorno: `localhost`
+ * dentro de un emulador apunta al propio emulador, no al PC. Decir a qué
+ * dirección se llamó convierte media hora de desconcierto en treinta segundos.
+ * En producción no se enseña: al usuario no le dice nada.
+ */
+function networkErrorMessage(url: string): string {
+  if (!__DEV__) {
+    return 'No se pudo conectar con el servidor. Revisa tu conexión.';
+  }
+
+  return [
+    `No se pudo conectar con ${url}`,
+    '',
+    'Comprueba EXPO_PUBLIC_API_URL en mobile/.env:',
+    '· Emulador Android: http://10.0.2.2:4000',
+    '· Simulador iOS: http://localhost:4000',
+    '· Móvil físico: http://TU_IP_LOCAL:4000',
+    '',
+    'Y que la API esté corriendo (npm run dev:api).',
+  ].join('\n');
+}
+
+/**
  * Único punto de salida a la red. Todo lo demas del cliente pasa por aquí, de
  * modo que el reintento por token caducado y el formato de error estan escritos
  * una sola vez.
  */
 async function requestEnvelope<T>(path: string, options: RequestOptions): Promise<Envelope<T>> {
-  // getSession() refresca por su cuenta si el token esta a punto de caducar.
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData.session?.access_token;
+  // getSession() refresca por su cuenta si el token esta a punto de caducar, y
+  // ese refresco es una llamada de red que puede quedarse colgada. Sin el
+  // limite, una pantalla se queda cargando para siempre sin llegar a pedir nada.
+  const token = await withTimeout(
+    supabase.auth.getSession().then(({ data }) => data.session?.access_token),
+    SESSION_TIMEOUT_MS,
+    'No se pudo validar tu sesión. Revisa tu conexión.',
+  );
+
+  const url = `${env.apiUrl}/api/v1${path}`;
+
+  // AbortController y no AbortSignal.timeout(): este ultimo no esta disponible
+  // en todas las versiones de Hermes.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   let response: Response;
 
   try {
-    response = await fetch(`${env.apiUrl}/api/v1${path}`, {
+    response = await fetch(url, {
       method: options.method ?? 'GET',
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
       },
       ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
+      signal: controller.signal,
     });
   } catch {
-    // fetch solo lanza cuando no hubo respuesta: sin red, servidor caido o URL
-    // mal configurada. Es el error más comun en desarrollo con un movil fisico.
+    // fetch solo lanza cuando no hubo respuesta: sin red, servidor caido, URL
+    // mal configurada o el timeout de arriba. Es el error más comun en
+    // desarrollo, sobre todo con un emulador o un movil fisico.
     throw new ApiError({
       status: 0,
       code: 'NETWORK_ERROR',
-      message: 'No se pudo conectar con el servidor. Revisa tu conexión.',
+      message: networkErrorMessage(url),
     });
+  } finally {
+    clearTimeout(timer);
   }
 
   // 204 (DELETE) no trae cuerpo.

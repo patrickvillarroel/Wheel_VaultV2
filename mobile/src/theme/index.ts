@@ -51,6 +51,16 @@ export const gradients = {
    */
   scrim: ['rgba(10, 10, 10, 0.2)', 'rgba(10, 10, 10, 0.82)', colors.background] as const,
   scrimLocations: [0, 0.5, 1] as const,
+
+  /**
+   * Cabecera de la pantalla de inicio: rojo intenso arriba a la izquierda que
+   * cae a casi negro, como en el diseño.
+   *
+   * Aquí el rojo sí es el fondo —no un resplandor sobre una foto— porque el
+   * coche va recortado encima, sin fotografía de por medio.
+   */
+  hero: ['#9E1319', '#4A090D', '#140406'] as const,
+  heroLocations: [0, 0.55, 1] as const,
 } as const;
 
 /** Escala de 4. Usar siempre estos valores, nunca numeros sueltos. */
