@@ -47,10 +47,24 @@ curl -s http://localhost:4000/api/v1/me -H "Authorization: Bearer $TOKEN"
 Debe devolver tu `user.id`, tu `user.email` y el `profile` que creó el trigger al
 registrarte. Si el perfil no aparece, el trigger `handle_new_user` no se aplicó.
 
-## 4. Necesitas un `brand_id`
+## 4. El catálogo de marcas
 
-Las marcas aún no tienen endpoint (llega en la fase 7). Saca uno del dashboard:
-**Table Editor → brands**, copia el `id` de Hot Wheels.
+```bash
+curl -s http://localhost:4000/api/v1/brands -H "Authorization: Bearer $TOKEN"
+```
+
+Deben venir **32 marcas** ordenadas por nombre, cada una con `car_count: 0`
+(todavía no tienes autos). Copia el `id` de Hot Wheels para el paso siguiente.
+
+El filtro que usará el selector del formulario:
+
+```bash
+curl -s "http://localhost:4000/api/v1/brands?q=hot" -H "Authorization: Bearer $TOKEN"
+```
+
+> Si esta llamada falla con un error de PostgREST sobre `cars(count)`, avísame:
+> el conteo usa una agregación incrustada que no pude verificar contra una base
+> de datos real. La alternativa es una consulta aparte, y es un cambio pequeño.
 
 ## 5. Recorre el CRUD
 
@@ -87,6 +101,13 @@ curl -s -i -X DELETE http://localhost:4000/api/v1/cars/CAR_ID -H "Authorization:
 
 El `DELETE` responde `204` sin cuerpo. Repetirlo da `404`.
 
+Después de crear el auto, vuelve a pedir el catálogo: la marca que usaste debe
+mostrar ahora `car_count: 1`. Y los autos de esa marca:
+
+```bash
+curl -s "http://localhost:4000/api/v1/brands/BRAND_ID/cars" -H "Authorization: Bearer $TOKEN"
+```
+
 ## 6. La prueba que de verdad importa
 
 Pide un token del **segundo** usuario (`test-b@wheelvault.test`) y pídele un auto
@@ -106,6 +127,10 @@ Tiene que responder:
 y el `DELETE` con el token de B: los tres deben dar 404.
 
 Si alguno devolviera los datos de A, para todo y dímelo.
+
+Comprueba también el conteo: con el token de B, el catálogo de marcas debe
+mostrar `car_count: 0` en la marca donde A tiene un auto. Si mostrara el conteo
+de A, la agregación no estaría respetando la RLS.
 
 ## Qué comprobar cuando algo falle
 

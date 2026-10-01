@@ -125,6 +125,9 @@ que el id existe y filtra información.
 | No se puede asignar un auto a un fabricante privado de otro usuario | `api/tests/cars.api.test.ts` | ✅ 5 |
 | Un cursor manipulado da 422 y no llega a consultar | `api/tests/pagination.test.ts` | ✅ 5 |
 | Zod: cantidad < 1, año inválido, texto fuera de límite, UUID malformado | `api/tests/cars.schema.test.ts` | ✅ 5 |
+| El catálogo de marcas exige token y no expone `created_by` | `api/tests/brands.api.test.ts` | ✅ 7 |
+| Los autos de una marca siguen acotados por el `user_id` del token | `api/tests/brands.api.test.ts` | ✅ 7 |
+| El `car_count` de cada marca cuenta solo los autos del usuario | manual, [probar-la-api.md](probar-la-api.md) paso 6 | 7 |
 | Mismos casos de aislamiento contra una base de datos real, vía HTTP | pendiente | 10 |
 
 `rls_isolation.sql` se vuelve a ejecutar **cada vez que se toca una policy**.

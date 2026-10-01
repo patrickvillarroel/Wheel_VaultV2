@@ -3,8 +3,8 @@
 Base: `/api/v1`. Todas las rutas requieren `Authorization: Bearer <access_token>`
 salvo `/health`.
 
-> **Estado**: `/health`, `/me` (fase 2) y `/cars` (fase 5) implementados.
-> `/brands` llega en la fase 7, `/stats/summary` en la 8 y `/profile` en la 9.
+> **Estado**: `/health`, `/me` (fase 2), `/cars` (fase 5) y `/brands` (fase 7)
+> implementados. `/stats/summary` llega en la fase 8 y `/profile` en la 9.
 
 ## Autenticación
 
@@ -23,9 +23,9 @@ Añadir endpoints espejo solo agregaría un salto de red y superficie de ataque.
 | `GET` | `/cars/:id` | Detalle |
 | `PATCH` | `/cars/:id` | Actualización **parcial** |
 | `DELETE` | `/cars/:id` | `204` |
-| `GET` | `/brands` | Catálogo + `car_count` (de *mis* autos) |
+| `GET` | `/brands` | Catálogo completo + `car_count` (de *mis* autos). `?q=` filtra por nombre |
 | `GET` | `/brands/:id` | Detalle + `car_count` |
-| `GET` | `/brands/:id/cars` | Mis autos de esa marca, misma paginación que `/cars` |
+| `GET` | `/brands/:id/cars` | Mis autos de esa marca, misma paginación que `/cars`. 404 si la marca no existe |
 | `GET` | `/profile` | Perfil |
 | `PATCH` | `/profile` | Edita `display_name` (y `bio` más adelante) |
 | `GET` | `/stats/summary` | Home: totales + últimos agregados, en un request |

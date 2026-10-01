@@ -133,7 +133,7 @@ en la base de datos, así que no habrá migración.
 | 5 | Cars API: CRUD, paginación keyset, filtros, tests de autorización | ✅ |
 | 5.5 | Fotos: Storage, subida, compresión, URLs firmadas | ⬜ |
 | 6 | Inventario UI: lista, detalle, crear, editar, borrar, estados | ⬜ |
-| 7 | Brands: API + pantallas + conteos | ⬜ |
+| 7 | Brands: API + conteos (pantallas con el móvil) | ✅ |
 | 8 | Home: `/stats/summary` + dashboard | ⬜ |
 | 9 | Perfil: ver, editar, logout | ⬜ |
 | 10 | Hardening: seguridad, auditoría, logs, accesibilidad, build EAS | ⬜ |

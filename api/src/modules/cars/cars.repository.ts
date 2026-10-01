@@ -4,6 +4,7 @@ import type { DbClient } from '../../config/supabase.js';
 import type { TablesInsert, TablesUpdate } from '../../types/database.types.js';
 import { AppError } from '../../shared/errors/AppError.js';
 import type { Cursor } from '../../shared/pagination.js';
+import { escapeLikePattern } from '../../shared/sql.js';
 
 /**
  * Acceso a datos de los autos. No conoce HTTP ni reglas de negocio.
@@ -57,14 +58,6 @@ function fail(operation: string, error: PostgrestError): never {
     code: error.code,
     message: error.message,
   });
-}
-
-/**
- * En LIKE/ILIKE, `%` y `_` son comodines. Si el usuario busca "911_GT3" espera
- * un guion bajo literal, no "cualquier caracter", asi que se escapan.
- */
-function escapeLikePattern(value: string): string {
-  return value.replace(/[\\%_]/g, '\\$&');
 }
 
 export async function list(db: DbClient, userId: string, params: ListParams): Promise<CarRow[]> {

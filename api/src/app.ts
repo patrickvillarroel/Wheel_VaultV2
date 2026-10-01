@@ -12,6 +12,7 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { sendSuccess } from './shared/http/envelope.js';
 import { meRouter } from './modules/profile/profile.routes.js';
 import { carsRouter } from './modules/cars/cars.routes.js';
+import { brandsRouter } from './modules/brands/brands.routes.js';
 
 /**
  * Las apps nativas no envian cabecera `Origin`, asi que CORS no las afecta: es
@@ -90,7 +91,7 @@ export function createApp(): Express {
   const v1 = Router();
   v1.use('/me', meRouter);
   v1.use('/cars', carsRouter);
-  // Fase 7: v1.use('/brands', brandsRouter)
+  v1.use('/brands', brandsRouter);
   // Fase 8: v1.use('/stats', statsRouter)
   // Fase 9: v1.use('/profile', profileRouter)
   app.use('/api/v1', v1);

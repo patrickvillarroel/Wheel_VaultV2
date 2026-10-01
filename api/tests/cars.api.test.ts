@@ -20,7 +20,12 @@ vi.mock('../src/modules/cars/cars.repository.js', () => ({
   remove: vi.fn(),
 }));
 
+// Se simulan todas las exportaciones, no solo la que usa cars.service: el app
+// completo monta tambien el router de marcas y un mock parcial dejaria
+// funciones sin definir esperando a que alguien las llame.
 vi.mock('../src/modules/brands/brands.repository.js', () => ({
+  listVisible: vi.fn(),
+  findById: vi.fn(),
   findVisibleById: vi.fn(),
 }));
 
