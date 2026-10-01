@@ -2,3 +2,4 @@ node_modules/
 dist/
 coverage/
 *.md
+api/src/types/database.types.ts

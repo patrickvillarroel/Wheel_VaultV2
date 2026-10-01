@@ -4,7 +4,15 @@ import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/coverage/**', 'mobile/**', 'supabase/**'],
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/coverage/**',
+      'mobile/**',
+      'supabase/**',
+      // Generado por `npm run db:types`: no se edita ni se reformatea a mano.
+      'api/src/types/database.types.ts',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -16,6 +24,22 @@ export default tseslint.config(
       ],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
+    },
+  },
+  {
+    // Scripts de mantenimiento: corren en Node y su salida ES la interfaz con
+    // la persona que los ejecuta, asi que aqui console si tiene sentido.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off',
     },
   },
   {
