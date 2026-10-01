@@ -29,7 +29,7 @@
 | Errores | Envelope estándar; stack traces y errores de Postgres solo a los logs |
 | Logs | Pino con redacción de `authorization`, `password` y `email` |
 | Base de datos | RLS en las tres tablas + `REVOKE ALL FROM anon` |
-| Storage | Bucket privado, policies por carpeta `<user_id>/`, URLs firmadas de corta duración |
+| Storage | Bucket privado, policies por carpeta `<user_id>/`, URLs firmadas de corta duración. La ruta la valida el servidor, no se acepta la del cliente ([ADR-007](decisions/ADR-007-storage-directo.md)) |
 
 ## Qué puede y qué no puede estar en la app móvil
 
@@ -128,6 +128,7 @@ que el id existe y filtra información.
 | El catálogo de marcas exige token y no expone `created_by` | `api/tests/brands.api.test.ts` | ✅ 7 |
 | Los autos de una marca siguen acotados por el `user_id` del token | `api/tests/brands.api.test.ts` | ✅ 7 |
 | El `car_count` de cada marca cuenta solo los autos del usuario | manual, [probar-la-api.md](probar-la-api.md) paso 6 | 7 |
+| `image_path` apuntando a la carpeta de otro usuario, o a otro auto, da 422 | `api/tests/cars.api.test.ts` | ✅ 5.5 |
 | Mismos casos de aislamiento contra una base de datos real, vía HTTP | pendiente | 10 |
 
 `rls_isolation.sql` se vuelve a ejecutar **cada vez que se toca una policy**.

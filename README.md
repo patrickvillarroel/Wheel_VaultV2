@@ -3,10 +3,10 @@
 App móvil para administrar una colección de carros a escala. Cada usuario tiene
 su propio inventario y solo puede ver y modificar lo que le pertenece.
 
-> **Estado actual: fases 0–5 y 7 completadas** — fundaciones, base de datos con
-> RLS, backend completo (auth, autos, marcas) y la app móvil con su design
-> system y el flujo de autenticación. Quedan el inventario (fase 6), las fotos
-> (5.5), la Home (8), el perfil (9) y el endurecimiento (10).
+> **Estado actual: fases 0–7 completadas** — base de datos con RLS, backend
+> completo (auth, autos, marcas) y app móvil con autenticación, inventario
+> completo y fotos. Quedan la Home (fase 8), el perfil (9) y el
+> endurecimiento (10).
 > Roadmap completo en [docs/architecture.md](docs/architecture.md).
 
 ## Stack

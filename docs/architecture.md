@@ -132,8 +132,8 @@ en la base de datos, así que no habrá migración.
 | 3 | Auth móvil: SecureStore, AuthContext, login/registro/reset, gate de rutas | ✅ |
 | 4 | Design system: tokens y componentes base del Figma | ✅ |
 | 5 | Cars API: CRUD, paginación keyset, filtros, tests de autorización | ✅ |
-| 5.5 | Fotos: Storage, subida, compresión, URLs firmadas | ⬜ |
-| 6 | Inventario UI: lista, detalle, crear, editar, borrar, estados | ⬜ |
+| 5.5 | Fotos: Storage, subida, compresión, URLs firmadas | ✅ |
+| 6 | Inventario UI: lista, detalle, crear, editar, borrar, estados | ✅ |
 | 7 | Brands: API + conteos (pantallas con el móvil) | ✅ |
 | 8 | Home: `/stats/summary` + dashboard | ⬜ |
 | 9 | Perfil: ver, editar, logout | ⬜ |
@@ -149,3 +149,4 @@ en la base de datos, así que no habrá migración.
 | [004](decisions/ADR-004-brand-vs-make.md) | `brand_id` (diecast) separado de `vehicle_make` (auto real) |
 | [005](decisions/ADR-005-module-structure.md) | Backend organizado por módulos, no por capas |
 | [006](decisions/ADR-006-server-state.md) | TanStack Query como capa de estado de servidor |
+| [007](decisions/ADR-007-storage-directo.md) | Las fotos suben directas a Storage, sin pasar por Express |

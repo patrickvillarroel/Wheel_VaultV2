@@ -21,7 +21,7 @@ Añadir endpoints espejo solo agregaría un salto de red y superficie de ataque.
 | `GET` | `/cars` | Lista paginada. `?limit=&cursor=&brand_id=&q=&sort=recent\|oldest` |
 | `POST` | `/cars` | Crea. `201` + header `Location` |
 | `GET` | `/cars/:id` | Detalle |
-| `PATCH` | `/cars/:id` | Actualización **parcial** |
+| `PATCH` | `/cars/:id` | Actualización **parcial**. Acepta `image_path`, validada contra `<user_id>/<car_id>.jpg` |
 | `DELETE` | `/cars/:id` | `204` |
 | `GET` | `/brands` | Catálogo completo + `car_count` (de *mis* autos). `?q=` filtra por nombre |
 | `GET` | `/brands/:id` | Detalle + `car_count` |

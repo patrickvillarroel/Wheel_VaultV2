@@ -55,6 +55,19 @@ src/
 4. Los límites de validación se importan de `@wheel-vault/shared` para que el
    móvil y la API validen exactamente lo mismo.
 
+## Si el typecheck falla con rutas
+
+`expo-router` genera los tipos de las rutas en `.expo/types/router.d.ts` cuando
+arranca Metro. Si el archivo se queda desfasado —por ejemplo tras renombrar o
+borrar una pantalla— `npm run typecheck` se queja de rutas que sí existen:
+
+```bash
+rm -rf mobile/.expo/types
+```
+
+y vuelve a arrancar `npm run dev:mobile`, que lo regenera. Sin el archivo el
+typecheck también pasa, solo que sin comprobar las rutas.
+
 ## Pendiente de diseño
 
 - La fotografía del coche del fondo en las pantallas de autenticación: falta el
