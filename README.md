@@ -29,7 +29,7 @@ su propio inventario y solo puede ver y modificar lo que le pertenece.
 │  └─ tests/        Pruebas de aislamiento entre usuarios (RLS)
 └─ docs/
    ├─ supabase-setup.md   Guía de Supabase desde cero
-   ├─ probar-la-api.md    Cómo verificar la API a mano con curl
+   ├─ probar-la-api.md    Cómo verificar la API contra la base de datos real
    ├─ architecture.md     Arquitectura y roadmap
    ├─ database.md         Modelo de datos, índices y policies
    ├─ security.md         Controles de seguridad
@@ -73,7 +73,8 @@ curl http://localhost:4000/health
 | `npm run typecheck` | Comprueba los tipos de todos los workspaces |
 | `npm run lint` · `npm run lint:fix` | ESLint |
 | `npm run format` | Prettier |
-| `npm test` | Tests de todos los workspaces |
+| `npm test` | Tests de todos los workspaces (repositorios simulados) |
+| `npm run smoke` | Prueba de humo contra la API y la base de datos reales |
 | `npm run db:types` | Regenera los tipos TypeScript desde el esquema (requiere `supabase link`) |
 
 ## Reglas del proyecto

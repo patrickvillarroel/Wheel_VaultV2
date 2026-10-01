@@ -1,12 +1,20 @@
-# Probar la API a mano
+# Probar la API contra la base de datos real
 
-Los tests automáticos verifican la capa que controlamos nosotros (autenticación,
-validación, traducción de errores) con los repositorios simulados. Esto de aquí
-es lo otro: comprobar que la API habla de verdad con tu base de datos.
+Los tests de `npm test` simulan los repositorios: verifican nuestra lógica, no
+la de PostgreSQL. Esto de aquí es lo otro — comprobar que la API habla de verdad
+con tu Supabase y que el aislamiento entre usuarios se cumple de extremo a
+extremo.
 
-Hazlo una vez ahora y repítelo cuando algo se comporte raro.
+## Antes de empezar
 
-## 1. Arranca la API
+**1. Dos usuarios de prueba.** En el dashboard:
+**Authentication → Users → Add user → Create new user**, marcando
+**Auto Confirm User**. Crea dos, por ejemplo `test-a@wheelvault.test` y
+`test-b@wheelvault.test`.
+
+Usa cuentas creadas solo para esto. Nunca una cuenta real.
+
+**2. La API corriendo**, en una terminal aparte:
 
 ```bash
 npm run dev:api
@@ -14,14 +22,44 @@ npm run dev:api
 
 Si falta algo en `api/.env`, el proceso muere diciéndote exactamente qué.
 
+## La forma rápida
+
+En otra terminal:
+
 ```bash
-curl http://localhost:4000/health
+npm run smoke
 ```
 
-## 2. Consigue un access token
+Te pedirá el email y la contraseña de los dos usuarios. No se guardan ni se
+imprimen en ninguna parte.
 
-La app móvil lo obtiene sola, pero para probar con `curl` hace falta pedirlo a
-mano. Usa uno de los usuarios de prueba que creaste para el test de RLS.
+El script recorre unas 40 comprobaciones: identidad y perfil, catálogo de
+marcas, CRUD completo, paginación, edición parcial y —lo importante— la sección
+**7. AISLAMIENTO ENTRE USUARIOS**, donde intenta con el token de B leer,
+modificar y borrar un auto de A. Al terminar limpia lo que creó.
+
+Resultado esperado:
+
+```
+====================================================
+ TODO CORRECTO — 40 comprobaciones
+====================================================
+```
+
+Si algo falla, el script lo nombra y te dice qué significa. **Pásame esa salida
+tal cual.**
+
+Para repetirlo sin teclear las credenciales cada vez, exporta
+`SMOKE_A_EMAIL`, `SMOKE_A_PASSWORD`, `SMOKE_B_EMAIL` y `SMOKE_B_PASSWORD`.
+
+> Conviene volver a ejecutarlo después de cada migración y cada vez que se toque
+> una policy.
+
+## A mano, con curl
+
+Útil para depurar un endpoint concreto cuando el script señala un fallo.
+
+### 1. Consigue un access token
 
 Sustituye `TU_PROJECT` y `TU_ANON_KEY` por los valores de `api/.env`:
 
@@ -29,66 +67,40 @@ Sustituye `TU_PROJECT` y `TU_ANON_KEY` por los valores de `api/.env`:
 curl -s -X POST "https://TU_PROJECT.supabase.co/auth/v1/token?grant_type=password" -H "apikey: TU_ANON_KEY" -H "Content-Type: application/json" -d "{\"email\":\"test-a@wheelvault.test\",\"password\":\"LA_QUE_PUSISTE\"}"
 ```
 
-De la respuesta copia el valor de `access_token`. Caduca en una hora; si empiezas
-a recibir `AUTH_TOKEN_EXPIRED`, vuelve a pedirlo.
+Copia el `access_token` de la respuesta. Caduca en una hora; si empiezas a
+recibir `AUTH_TOKEN_EXPIRED`, pide otro.
 
-En PowerShell puedes guardarlo en una variable:
+En PowerShell:
 
 ```bash
 $TOKEN = "pega-aqui-el-access-token"
 ```
 
-## 3. Comprueba la identidad
+### 2. Identidad
 
 ```bash
 curl -s http://localhost:4000/api/v1/me -H "Authorization: Bearer $TOKEN"
 ```
 
-Debe devolver tu `user.id`, tu `user.email` y el `profile` que creó el trigger al
-registrarte. Si el perfil no aparece, el trigger `handle_new_user` no se aplicó.
+Debe traer tu `user.id`, tu `user.email` y el `profile` que creó el trigger al
+registrarte.
 
-## 4. El catálogo de marcas
+### 3. Marcas
 
 ```bash
 curl -s http://localhost:4000/api/v1/brands -H "Authorization: Bearer $TOKEN"
 ```
 
-Deben venir **32 marcas** ordenadas por nombre, cada una con `car_count: 0`
-(todavía no tienes autos). Copia el `id` de Hot Wheels para el paso siguiente.
+32 marcas ordenadas por nombre, cada una con su `car_count`. Copia un `id`.
 
-El filtro que usará el selector del formulario:
-
-```bash
-curl -s "http://localhost:4000/api/v1/brands?q=hot" -H "Authorization: Bearer $TOKEN"
-```
-
-> Si esta llamada falla con un error de PostgREST sobre `cars(count)`, avísame:
-> el conteo usa una agregación incrustada que no pude verificar contra una base
-> de datos real. La alternativa es una consulta aparte, y es un cambio pequeño.
-
-## 5. Recorre el CRUD
-
-Crear (sustituye `BRAND_ID`):
+### 4. CRUD
 
 ```bash
 curl -s -i -X POST http://localhost:4000/api/v1/cars -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "{\"brand_id\":\"BRAND_ID\",\"model\":\"911 GT3\",\"vehicle_make\":\"Porsche\",\"year\":2024,\"quantity\":2}"
 ```
 
-Espera `201` y una cabecera `Location`. Copia el `id` de la respuesta.
-
-Listar:
-
 ```bash
 curl -s "http://localhost:4000/api/v1/cars?limit=20" -H "Authorization: Bearer $TOKEN"
-```
-
-Debe venir el auto con su `brand` incrustado (`{ id, name, slug, logo_url }`) y
-un `meta` con `next_cursor` y `has_more`.
-
-Ver uno, editar y borrar (sustituye `CAR_ID`):
-
-```bash
-curl -s http://localhost:4000/api/v1/cars/CAR_ID -H "Authorization: Bearer $TOKEN"
 ```
 
 ```bash
@@ -101,43 +113,24 @@ curl -s -i -X DELETE http://localhost:4000/api/v1/cars/CAR_ID -H "Authorization:
 
 El `DELETE` responde `204` sin cuerpo. Repetirlo da `404`.
 
-Después de crear el auto, vuelve a pedir el catálogo: la marca que usaste debe
-mostrar ahora `car_count: 1`. Y los autos de esa marca:
+### 5. Aislamiento
 
-```bash
-curl -s "http://localhost:4000/api/v1/brands/BRAND_ID/cars" -H "Authorization: Bearer $TOKEN"
-```
-
-## 6. La prueba que de verdad importa
-
-Pide un token del **segundo** usuario (`test-b@wheelvault.test`) y pídele un auto
-creado por el primero:
+Con un token del **segundo** usuario, pide un auto del primero:
 
 ```bash
 curl -s http://localhost:4000/api/v1/cars/CAR_ID_DE_A -H "Authorization: Bearer $TOKEN_DE_B"
 ```
 
-Tiene que responder:
+Debe responder **404 `CAR_NOT_FOUND`**, no 403: un 403 confirmaría que ese id
+existe. Lo mismo con `PATCH` y `DELETE`.
 
-```json
-{"success":false,"error":{"code":"CAR_NOT_FOUND","message":"No se encontro el auto"},"request_id":"..."}
-```
-
-**404 y no 403.** Un 403 confirmaría que ese id existe. Prueba también el `PATCH`
-y el `DELETE` con el token de B: los tres deben dar 404.
-
-Si alguno devolviera los datos de A, para todo y dímelo.
-
-Comprueba también el conteo: con el token de B, el catálogo de marcas debe
-mostrar `car_count: 0` en la marca donde A tiene un auto. Si mostrara el conteo
-de A, la agregación no estaría respetando la RLS.
-
-## Qué comprobar cuando algo falle
+## Si algo falla
 
 | Síntoma | Causa probable |
 |---|---|
-| `AUTH_TOKEN_EXPIRED` | El token caducó. Pide otro (paso 2) |
-| `AUTH_TOKEN_INVALID` | El token es de otro proyecto de Supabase, o `SUPABASE_URL` no coincide |
+| `AUTH_TOKEN_EXPIRED` | El token caducó. Pide otro |
+| `AUTH_TOKEN_INVALID` | El token es de otro proyecto, o `SUPABASE_URL` no coincide |
 | `BRAND_NOT_FOUND` al crear | El `brand_id` no existe o es privado de otro usuario |
 | `PROFILE_NOT_FOUND` en `/me` | El trigger `handle_new_user` no se aplicó; revisa la migración de `profiles` |
+| Error de PostgREST sobre `cars(count)` | La agregación incrustada del `car_count` no es compatible. Dímelo: la alternativa es una consulta aparte |
 | `500 INTERNAL_ERROR` | Mira la terminal de la API: el detalle real está en el log, junto al `request_id` que te devolvió |
