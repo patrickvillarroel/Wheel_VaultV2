@@ -254,9 +254,22 @@ npm run db:types
 Genera `api/src/types/database.types.ts`. **Este comando hay que volver a
 correrlo cada vez que cambiemos una migración.**
 
-(Requiere haber hecho `supabase link`, opción A del paso 4. Si fuiste por la
-opción B, también puedes generarlos desde el dashboard en
-**Project Settings → API → Generate types**, o hacer el `link` solo para esto.)
+Requiere haber hecho `supabase link` (opción A del paso 4). No hace falta
+instalar la CLI globalmente: el script la invoca con `npx`.
+
+Para una instancia local (`supabase start`):
+
+```bash
+npm run db:types -- --local
+```
+
+> **Por qué es un script de Node y no una redirección del shell.** Lo natural
+> sería `supabase gen types ... > archivo.ts`, pero el operador `>` **vacía el
+> archivo antes** de ejecutar el comando. Si el comando falla —la CLI no está,
+> el proyecto no está enlazado, no hay red— te quedas sin el archivo anterior y
+> el proyecto deja de compilar. `scripts/gen-types.mjs` captura la salida en
+> memoria y solo escribe si el comando terminó bien y lo que devolvió parece de
+> verdad un archivo de tipos.
 
 ---
 

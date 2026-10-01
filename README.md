@@ -72,7 +72,7 @@ curl http://localhost:4000/health
 | `npm run lint` · `npm run lint:fix` | ESLint |
 | `npm run format` | Prettier |
 | `npm test` | Tests de todos los workspaces |
-| `npm run db:types` | Regenera los tipos TypeScript desde el esquema |
+| `npm run db:types` | Regenera los tipos TypeScript desde el esquema (requiere `supabase link`) |
 
 ## Reglas del proyecto
 

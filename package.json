@@ -19,7 +19,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
-    "db:types": "supabase gen types typescript --linked > api/src/types/database.types.ts"
+    "db:types": "node scripts/gen-types.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
