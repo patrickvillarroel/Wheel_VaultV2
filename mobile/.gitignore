@@ -1,0 +1,28 @@
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Entorno — nunca versionar
+.env
+.env.local
+
+# Nativo (se genera con prebuild)
+/ios
+/android
+
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+.DS_Store
+
+# Claude Code
+.claude/
+
+# Dependencies
+node_modules/
