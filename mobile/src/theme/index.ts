@@ -38,17 +38,19 @@ export const colors = {
   overlay: 'rgba(0, 0, 0, 0.6)',
 } as const;
 
-/** Gradientes del diseño: el hero y el boton principal. */
+/** Gradientes del diseño: el botón principal y el velo sobre la fotografía. */
 export const gradients = {
   brand: [colors.red, colors.redDark] as const,
+
   /**
-   * Fondo de las pantallas de autenticacion: rojo muy oscuro arriba que cae a
-   * negro enseguida. En el diseno el rojo es un resplandor, no un fondo; un
-   * degradado saturado se come el contraste del texto blanco.
+   * Velo sobre la fotografía de las pantallas de autenticación.
+   *
+   * Arriba deja ver el coche; abajo cierra a negro sólido, que es donde cae la
+   * tarjeta del formulario. No es decoración: sin él, el texto blanco pierde
+   * contraste sobre las zonas claras de la foto.
    */
-  hero: ['#3B0A0F', '#140406', colors.background] as const,
-  /** Donde cae cada parada del degradado hero. */
-  heroLocations: [0, 0.35, 1] as const,
+  scrim: ['rgba(10, 10, 10, 0.2)', 'rgba(10, 10, 10, 0.82)', colors.background] as const,
+  scrimLocations: [0, 0.5, 1] as const,
 } as const;
 
 /** Escala de 4. Usar siempre estos valores, nunca numeros sueltos. */

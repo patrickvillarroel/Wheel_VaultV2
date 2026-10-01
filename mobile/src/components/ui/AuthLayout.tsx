@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -12,10 +13,6 @@ import { Wordmark } from './Wordmark';
  *
  * El `KeyboardAvoidingView` no es un detalle: en estas pantallas el teclado
  * tapa justo el campo de contraseña y el boton de enviar.
- *
- * NOTA DE DISEÑO: el Figma lleva una fotografia de un coche detras del
- * degradado. Falta el recurso; cuando este, va como <Image> bajo el
- * LinearGradient, sin tocar el resto.
  */
 export function AuthLayout({
   title,
@@ -32,9 +29,28 @@ export function AuthLayout({
 }) {
   return (
     <Screen edges={['bottom']}>
+      <Image
+        source={require('../../../assets/images/fondo_login.jpg')}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        // La foto aparece de golpe cuando termina de decodificar y el salto se
+        // nota. Con la transición entra sobre el negro del fondo y parece
+        // intencionado.
+        transition={400}
+        // Decorativa: no aporta nada a quien no la ve.
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+      />
+
+      {/*
+        Velo oscuro sobre la foto. No es decoracion: sin el, el texto blanco
+        pierde contraste sobre las zonas claras del coche y la tarjeta se
+        confunde con el fondo. Se oscurece mas hacia abajo, que es donde esta
+        el formulario.
+      */}
       <LinearGradient
-        colors={[...gradients.hero]}
-        locations={[...gradients.heroLocations]}
+        colors={[...gradients.scrim]}
+        locations={[...gradients.scrimLocations]}
         style={StyleSheet.absoluteFill}
       />
 

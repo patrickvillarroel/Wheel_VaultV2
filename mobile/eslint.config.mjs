@@ -49,6 +49,14 @@ export default tseslint.config(
       ],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
+      // En React Native las imágenes se cargan con require(): Metro las
+      // resuelve en tiempo de compilación para poder empaquetarlas y elegir la
+      // densidad (@2x, @3x). Un import ES no las tipa, porque expo/types no
+      // declara los modulos de imagen. Se permite solo para recursos.
+      '@typescript-eslint/no-require-imports': [
+        'error',
+        { allow: ['\\.(png|jpe?g|gif|webp|svg|mp4|ttf|otf)$'] },
+      ],
     },
   },
   prettier,

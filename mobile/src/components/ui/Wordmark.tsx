@@ -1,39 +1,58 @@
+import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../../theme';
 
 /**
- * El logotipo "Collector's Project".
+ * El logotipo: el velocímetro sobre "Collector's Project".
  *
- * Es una aproximacion con la tipografia del sistema en cursiva y peso máximo.
- * El diseño usa una fuente display con un corte muy concreto que no tenemos
- * licenciada: cuando llegue, lo correcto es exportarla desde Figma como SVG o
- * PNG y sustituir este componente, no buscar una fuente "parecida".
+ * El velocímetro es el recurso real del diseño. El texto sigue siendo una
+ * aproximación con la tipografía del sistema en cursiva y peso máximo: la
+ * fuente display del Figma no está licenciada. Si algún día llega, lo correcto
+ * es exportar el conjunto completo como una sola imagen y sustituir este
+ * componente entero, no buscar una fuente "parecida".
  */
 export function Wordmark({ size = 'large' }: { size?: 'large' | 'small' }) {
   const scale = size === 'large' ? 1 : 0.55;
 
   return (
-    <View accessibilityRole="header" accessibilityLabel="Collector's Project">
-      <Text style={[styles.top, { fontSize: 44 * scale, lineHeight: 48 * scale }]}>
+    <View style={styles.root} accessibilityRole="header" accessibilityLabel="Collector's Project">
+      <Image
+        source={require('../../../assets/images/Velocimetro.png')}
+        style={{ width: 150 * scale, height: 99 * scale }}
+        contentFit="contain"
+        // El texto de al lado ya describe el logotipo; anunciarlo otra vez
+        // sería ruido para un lector de pantalla.
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+      />
+
+      <Text style={[styles.line, styles.top, { fontSize: 44 * scale, lineHeight: 48 * scale }]}>
         Collector&apos;s
       </Text>
-      <Text style={[styles.bottom, { fontSize: 44 * scale, lineHeight: 48 * scale }]}>Project</Text>
+      <Text style={[styles.line, styles.bottom, { fontSize: 44 * scale, lineHeight: 48 * scale }]}>
+        Project
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  top: {
-    color: colors.textPrimary,
+  root: {
+    alignItems: 'center',
+  },
+  line: {
     fontWeight: '900',
     fontStyle: 'italic',
     letterSpacing: -1,
+    textAlign: 'center',
+  },
+  top: {
+    color: colors.textPrimary,
+    // El velocímetro se apoya sobre el texto, como en el diseño.
+    marginTop: -6,
   },
   bottom: {
     color: colors.red,
-    fontWeight: '900',
-    fontStyle: 'italic',
-    letterSpacing: -1,
     marginTop: -6,
   },
 });
