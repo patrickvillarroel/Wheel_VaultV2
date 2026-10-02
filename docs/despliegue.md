@@ -67,6 +67,13 @@ que no deben vivir en el repositorio. Son las mismas de tu `api/.env`:
 ([ADR-002](decisions/ADR-002-jwt-propagation.md)) y cuantos menos sitios tengan
 ese secreto, mejor.
 
+> **Si el build falla con «Could not find a declaration file for module
+> 'express'»**: es que el `buildCommand` perdió el `--include=dev`. Con
+> `NODE_ENV=production`, npm omite las devDependencies —donde viven TypeScript
+> y los `@types`— y compilar las necesita aunque ejecutar no. Está puesto en
+> `render.yaml`; si editaste el comando desde el panel de Render, ese valor
+> manda sobre el del archivo.
+
 ### 4. Comprueba que arrancó
 
 Render te da una URL del estilo `https://collectors-project-api.onrender.com`.

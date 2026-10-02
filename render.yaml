@@ -16,7 +16,12 @@ services:
     # El build se lanza desde la raíz del monorepo: la API importa
     # @wheel-vault/shared, que hay que compilar antes. `npm run build` de la
     # raíz hace las dos en orden.
-    buildCommand: npm ci && npm run build
+    #
+    # `--include=dev` no es opcional: con NODE_ENV=production, npm omite las
+    # devDependencies, y ahí están TypeScript y los @types. Sin ellas el build
+    # falla con "Could not find a declaration file for module 'express'".
+    # Compilar necesita esas dependencias aunque ejecutar no.
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start --workspace=api
 
     # Render reinicia el servicio si esta ruta deja de responder.
