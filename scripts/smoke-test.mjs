@@ -155,6 +155,26 @@ async function api(token, method, path, body) {
   return { status: response.status, body: json, headers: response.headers };
 }
 
+/**
+ * Resume el error que devolvio la API.
+ *
+ * El `request_id` es la pieza clave: es el mismo que aparece en los logs del
+ * servidor, asi que permite saltar directamente a la linea que explica el fallo
+ * en vez de leer todo el log.
+ */
+function describe(response) {
+  const code = response.body?.error?.code;
+  const message = response.body?.error?.message;
+  const requestId = response.body?.request_id;
+
+  const parts = [`recibido ${response.status}`];
+  if (code) parts.push(code);
+  if (message && message !== code) parts.push(`"${message}"`);
+  if (requestId) parts.push(`request_id ${requestId}`);
+
+  return parts.join(' · ');
+}
+
 // ---------------------------------------------------------------------------
 // Prueba
 // ---------------------------------------------------------------------------
@@ -206,7 +226,7 @@ async function main() {
     section('1. Identidad y perfil');
 
     const me = await api(tokenA, 'GET', '/api/v1/me');
-    check('GET /me responde 200', me.status === 200, `recibido ${me.status}`);
+    check('GET /me responde 200', me.status === 200, describe(me));
     check(
       'devuelve el perfil creado por el trigger handle_new_user',
       Boolean(me.body?.data?.profile?.display_name),
@@ -224,7 +244,7 @@ async function main() {
     section('2. Catalogo de marcas');
 
     const brands = await api(tokenA, 'GET', '/api/v1/brands');
-    check('GET /brands responde 200', brands.status === 200, `recibido ${brands.status}`);
+    check('GET /brands responde 200', brands.status === 200, describe(brands));
 
     const list = brands.body?.data ?? [];
     check('el catalogo global esta sembrado (32 marcas)', list.length === 32, `hay ${list.length}`);
@@ -263,7 +283,7 @@ async function main() {
       user_id: '00000000-0000-4000-8000-000000000000',
     });
 
-    check('POST /cars responde 201', creado.status === 201, `recibido ${creado.status}`);
+    check('POST /cars responde 201', creado.status === 201, describe(creado));
     carId = creado.body?.data?.id ?? null;
     check('devuelve la cabecera Location', Boolean(creado.headers.get('location')));
     check('el auto trae su marca incrustada', Boolean(creado.body?.data?.brand?.name));

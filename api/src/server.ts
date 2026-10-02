@@ -6,7 +6,7 @@
  */
 import { createApp } from './app.js';
 import { env } from './config/env.js';
-import { warnIfTokensCannotBeVerified } from './config/jwt.js';
+import { runStartupChecks } from './config/startupChecks.js';
 import { logger } from './config/logger.js';
 
 const app = createApp();
@@ -20,9 +20,7 @@ const server = app.listen(env.PORT, () => {
  * hosting tiene que poder responder aunque la configuracion este incompleta,
  * o el servicio se marca como caido y nunca llegas a leer el motivo.
  */
-void warnIfTokensCannotBeVerified().catch((error: unknown) => {
-  logger.fatal(error instanceof Error ? error.message : error);
-});
+void runStartupChecks();
 
 /**
  * Apagado ordenado: deja terminar las peticiones en curso antes de salir. Sin
