@@ -27,7 +27,7 @@ import { AppError } from '../shared/errors/AppError.js';
  * se creo, y para que la migración a asimetricas no rompa nada.
  */
 
-const issuer = `${env.SUPABASE_URL.replace(/\/+$/, '')}/auth/v1`;
+export const issuer = `${env.SUPABASE_URL.replace(/\/+$/, '')}/auth/v1`;
 
 /**
  * `createRemoteJWKSet` cachea las claves públicas en memoria y solo vuelve a
@@ -94,4 +94,50 @@ export async function verifyAccessToken(token: string): Promise<AuthenticatedUse
   const email = typeof payload['email'] === 'string' ? payload['email'] : null;
 
   return { id: subject, email };
+}
+
+/**
+ * Avisa al arrancar si la API no va a poder verificar NINGUN token.
+ *
+ * Supabase firma de dos maneras: con claves asimetricas publicadas en un JWKS
+ * (proyectos nuevos) o con un secreto compartido HS256 (proyectos antiguos). Si
+ * el proyecto usa HS256 y falta `SUPABASE_JWT_SECRET`, cada peticion
+ * autenticada devuelve un 500 y la app queda inservible.
+ *
+ * Eso se descubria leyendo los logs de 40 peticiones fallidas. Mejor decirlo una
+ * vez, al arrancar, cuando todavia se esta mirando la consola del despliegue.
+ *
+ * No aborta el proceso: un fallo de red momentaneo al consultar el JWKS no debe
+ * tumbar un servicio que por lo demas funciona. Solo deja el aviso donde se ve.
+ */
+export async function warnIfTokensCannotBeVerified(): Promise<void> {
+  // Con el secreto configurado puede verificar HS256 pase lo que pase.
+  if (env.SUPABASE_JWT_SECRET) return;
+
+  try {
+    const response = await fetch(`${issuer}/.well-known/jwks.json`);
+    const body: unknown = await response.json();
+    const keys = (body as { keys?: unknown[] } | null)?.keys;
+
+    // Hay claves publicas: el proyecto firma con claves asimetricas y no
+    // necesita el secreto.
+    if (Array.isArray(keys) && keys.length > 0) return;
+  } catch {
+    // Sin respuesta del JWKS no se puede concluir nada. Se deja constancia y se
+    // sigue: el servicio puede estar bien y Supabase solo tardar en responder.
+    return;
+  }
+
+  // JWKS vacio y sin secreto: no hay forma de verificar una firma.
+  throw new Error(
+    [
+      'CONFIGURACION INCOMPLETA: falta SUPABASE_JWT_SECRET.',
+      '',
+      'Tu proyecto de Supabase firma los tokens con el secreto compartido',
+      '(HS256), pero esa variable no esta configurada. TODAS las peticiones',
+      'autenticadas van a devolver 500.',
+      '',
+      'El valor esta en Supabase > Project Settings > JWT Keys > legacy JWT secret.',
+    ].join('\n'),
+  );
 }

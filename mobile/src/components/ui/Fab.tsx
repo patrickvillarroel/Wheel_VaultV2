@@ -12,7 +12,16 @@ import { colors, gradients, radii, spacing } from '../../theme';
  */
 export const FAB_CLEARANCE = 96;
 
-export function Fab({ onPress, label }: { onPress: () => void; label: string }) {
+export function Fab({
+  onPress,
+  label,
+  icon = 'add',
+}: {
+  onPress: () => void;
+  label: string;
+  /** Por defecto el "+" de las listas; el detalle lo usa para editar. */
+  icon?: keyof typeof Ionicons.glyphMap;
+}) {
   return (
     <Pressable
       onPress={onPress}
@@ -26,7 +35,7 @@ export function Fab({ onPress, label }: { onPress: () => void; label: string }) 
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
       >
-        <Ionicons name="add" size={30} color={colors.textOnBrand} />
+        <Ionicons name={icon} size={icon === 'add' ? 30 : 24} color={colors.textOnBrand} />
       </LinearGradient>
     </Pressable>
   );

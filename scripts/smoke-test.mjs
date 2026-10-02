@@ -228,14 +228,17 @@ async function main() {
 
     const list = brands.body?.data ?? [];
     check('el catalogo global esta sembrado (32 marcas)', list.length === 32, `hay ${list.length}`);
+    // `list.length > 0` no sobra: sin el, `every()` sobre una lista vacia
+    // devuelve true y estas dos comprobaciones pasarian aunque la peticion
+    // hubiera fallado, haciendo que el informe parezca mejor de lo que es.
     check(
       'la agregacion cars(count) funciona',
-      list.every((brand) => typeof brand.car_count === 'number'),
+      list.length > 0 && list.every((brand) => typeof brand.car_count === 'number'),
       'si falla aqui, el conteo incrustado no es compatible: avisame',
     );
     check(
       'no se expone created_by',
-      list.every((brand) => !('created_by' in brand)),
+      list.length > 0 && list.every((brand) => !('created_by' in brand)),
     );
 
     const hotWheels = list.find((brand) => brand.slug === 'hot-wheels');
@@ -373,7 +376,10 @@ async function main() {
     const listaB = await api(tokenB, 'GET', '/api/v1/cars?limit=50');
     check(
       'el auto de A no aparece en la lista de B',
-      !(listaB.body?.data ?? []).some((car) => car.id === carId),
+      // Se exige el 200: una lista vacia porque la peticion fallo no demuestra
+      // aislamiento, solo que algo se rompio antes de llegar a la base de datos.
+      listaB.status === 200 && !(listaB.body?.data ?? []).some((car) => car.id === carId),
+      listaB.status !== 200 ? `la peticion fallo con ${listaB.status}` : undefined,
     );
 
     const brandsB = await api(tokenB, 'GET', '/api/v1/brands');
@@ -387,7 +393,8 @@ async function main() {
     const deLaMarcaB = await api(tokenB, 'GET', `/api/v1/brands/${brandId}/cars`);
     check(
       'los autos de esa marca para B no incluyen los de A',
-      !(deLaMarcaB.body?.data ?? []).some((car) => car.id === carId),
+      deLaMarcaB.status === 200 && !(deLaMarcaB.body?.data ?? []).some((car) => car.id === carId),
+      deLaMarcaB.status !== 200 ? `la peticion fallo con ${deLaMarcaB.status}` : undefined,
     );
 
     // A sigue viendo lo suyo despues de todo lo anterior.

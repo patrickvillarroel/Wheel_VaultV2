@@ -61,7 +61,16 @@ que no deben vivir en el repositorio. Son las mismas de tu `api/.env`:
 |---|---|
 | `SUPABASE_URL` | Supabase → Project Settings → Data API |
 | `SUPABASE_ANON_KEY` | Supabase → Project Settings → API Keys → anon |
-| `SUPABASE_JWT_SECRET` | Solo si tu proyecto firma con HS256; si no, déjala vacía |
+| `SUPABASE_JWT_SECRET` | Supabase → Project Settings → **JWT Keys** → *legacy JWT secret* |
+
+> **Sobre `SUPABASE_JWT_SECRET`**: hace falta si tu proyecto firma los tokens
+> con el secreto compartido (HS256), que es lo que usan los proyectos creados
+> antes de que Supabase pasara a claves asimétricas. Si lo tienes relleno en tu
+> `api/.env`, aquí también va.
+>
+> Si falta y el proyecto lo necesita, **todas las peticiones autenticadas
+> devuelven 500** y la app queda inservible. La API lo detecta al arrancar y lo
+> dice en los logs con un `FATAL`, así que no hay que deducirlo.
 
 **`SUPABASE_SERVICE_ROLE_KEY` no se pone.** La API no la usa
 ([ADR-002](decisions/ADR-002-jwt-propagation.md)) y cuantos menos sitios tengan
