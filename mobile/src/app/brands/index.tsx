@@ -69,10 +69,13 @@ export default function BrandsScreen() {
               />
             }
             renderItem={({ item }) => (
-              <BrandCard
-                brand={item}
-                onPress={() => router.push({ pathname: '/brands/[id]', params: { id: item.id } })}
-              />
+              <View style={styles.cell}>
+                <BrandCard
+                  brand={item}
+                  fill
+                  onPress={() => router.push({ pathname: '/brands/[id]', params: { id: item.id } })}
+                />
+              </View>
             )}
           />
         </>
@@ -92,6 +95,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   row: {
-    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  cell: {
+    flex: 1,
   },
 });

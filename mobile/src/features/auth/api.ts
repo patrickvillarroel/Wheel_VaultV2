@@ -80,10 +80,23 @@ export async function signUp(
   return { needsEmailConfirmation: data.session === null };
 }
 
+/**
+ * Cierra la sesión.
+ *
+ * Por defecto el SDK revoca el refresh token en el servidor, de modo que la
+ * sesión muere en todos los dispositivos. Eso exige una llamada de red, y si
+ * falla —sin cobertura, servidor caído— el usuario se quedaría dentro de una
+ * app de la que acaba de pedir salir.
+ *
+ * Por eso hay un segundo intento local: revocar en el servidor es lo deseable,
+ * pero borrar las credenciales de ESTE dispositivo es lo imprescindible.
+ */
 export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut();
 
-  if (error) throw translate(error);
+  if (!error) return;
+
+  await supabase.auth.signOut({ scope: 'local' });
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {

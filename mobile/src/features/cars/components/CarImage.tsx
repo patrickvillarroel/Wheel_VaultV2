@@ -17,6 +17,7 @@ interface CarImageStyle {
   height?: DimensionValue;
   aspectRatio?: number;
   borderRadius?: number;
+  alignSelf?: 'stretch' | 'center' | 'flex-start' | 'flex-end';
 }
 
 /**

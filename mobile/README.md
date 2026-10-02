@@ -55,6 +55,40 @@ src/
 4. Los límites de validación se importan de `@wheel-vault/shared` para que el
    móvil y la API validen exactamente lo mismo.
 
+## Generar un APK
+
+La app no lleva la API dentro: para usarla fuera de tu red hay que desplegarla y
+apuntar el APK a esa URL. Está explicado paso a paso en
+[docs/despliegue.md](../docs/despliegue.md).
+
+Un detalle que no es evidente: **`mobile/.env` no llega a EAS**. Está en
+`.gitignore` y EAS no sube los archivos ignorados, así que las variables
+`EXPO_PUBLIC_*` hay que declararlas en el panel de Expo. Si se olvida, el APK se
+construye sin configuración y falla al arrancar.
+
+## Logotipos de las marcas
+
+Van en **`mobile/assets/images/brands/<slug>.png`**, con el mismo slug que la
+marca tiene en la base de datos (`hot-wheels.png`, `mini-gt.png`…). Los slugs
+están en la migración `supabase/migrations/20260930120200_brands.sql` y los
+devuelve `GET /api/v1/brands`.
+
+Después hay que añadir su línea en
+[`src/features/brands/logos.ts`](src/features/brands/logos.ts). Ese segundo paso
+no se puede evitar: Metro resuelve los `require()` en tiempo de compilación para
+poder empaquetar el archivo, así que una ruta construida al vuelo no funciona.
+
+PNG con fondo transparente, unos 300 px de ancho. La app tiene fondo negro, así
+que conviene la versión clara del logotipo cuando exista.
+
+Una marca sin logotipo muestra su nombre en texto: el catálogo sigue siendo
+usable mientras se completan las imágenes.
+
+> `brands.logo_url` existe en la base de datos y **tiene prioridad** sobre el
+> archivo incluido en la app. Es la vía para las marcas que cree un usuario
+> ([ADR-003](../docs/decisions/ADR-003-brands-ownership.md)), que sí vivirían en
+> Storage.
+
 ## Si el typecheck falla con rutas
 
 `expo-router` genera los tipos de las rutas en `.expo/types/router.d.ts`, y solo

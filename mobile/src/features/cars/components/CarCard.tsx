@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { FavoriteButton } from '../../../components/ui/FavoriteButton';
 import { colors, radii, spacing, typography, TOUCH_TARGET } from '../../../theme';
 import type { Car } from '../api';
 import { CarImage } from './CarImage';
@@ -49,22 +49,13 @@ export const CarCard = memo(function CarCard({
         </View>
       </Pressable>
 
-      <Pressable
-        onPress={onToggleFavorite}
-        hitSlop={spacing.sm}
-        accessibilityRole="button"
-        accessibilityLabel={
-          car.is_favorite ? `Quitar ${car.model} de favoritos` : `Marcar ${car.model} como favorito`
-        }
-        accessibilityState={{ selected: car.is_favorite }}
-        style={({ pressed }) => [styles.favorite, pressed && styles.pressed]}
-      >
-        <Ionicons
-          name={car.is_favorite ? 'heart' : 'heart-outline'}
-          size={22}
-          color={car.is_favorite ? colors.red : colors.textMuted}
+      <View style={styles.favorite}>
+        <FavoriteButton
+          isFavorite={car.is_favorite}
+          onToggle={onToggleFavorite}
+          label={car.model}
         />
-      </Pressable>
+      </View>
 
       {/* La cantidad solo se muestra cuando hay más de uno: un "1" en cada
           tarjeta es ruido que no aporta nada. */}
@@ -117,10 +108,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.xs,
     bottom: spacing.xs,
-    width: TOUCH_TARGET,
-    height: TOUCH_TARGET,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   badge: {
     position: 'absolute',

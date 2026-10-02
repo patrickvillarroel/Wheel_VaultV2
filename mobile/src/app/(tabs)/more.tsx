@@ -1,21 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Banner } from '../../components/ui/Banner';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../../components/ui/Button';
 import { Screen } from '../../components/ui/Screen';
+import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { signOut } from '../../features/auth/api';
 import { useMe } from '../../features/profile/hooks';
-import { colors, radii, spacing, typography } from '../../theme';
+import { colors, radii, spacing, typography, TOUCH_TARGET } from '../../theme';
 
-/**
- * Pantalla "Más": por ahora el perfil y el cierre de sesión.
- *
- * Es la primera que consume la API de Express, así que también sirve para
- * comprobar de un vistazo que el token viaja y que /me responde.
- */
 export default function MoreScreen() {
-  const { data, isLoading, isError, error, refetch } = useMe();
+  const router = useRouter();
+  const { data } = useMe();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   function confirmSignOut() {
@@ -35,42 +31,48 @@ export default function MoreScreen() {
   }
 
   return (
-    <Screen>
+    <Screen edges={['top']}>
+      <ScreenHeader title="Más" />
+
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.heading}>Más</Text>
+        <Pressable
+          onPress={() => router.push('/profile')}
+          accessibilityRole="button"
+          accessibilityLabel="Ver tu perfil"
+          style={({ pressed }) => [styles.identity, pressed && styles.pressed]}
+        >
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {(data?.profile.display_name ?? '?').charAt(0).toUpperCase()}
+            </Text>
+          </View>
 
-        {isLoading ? (
-          <View style={styles.card}>
-            <ActivityIndicator color={colors.red} />
-          </View>
-        ) : isError ? (
-          <View style={styles.stack}>
-            <Banner
-              tone="error"
-              message={error instanceof Error ? error.message : 'No se pudo cargar tu perfil'}
-            />
-            <Button label="Reintentar" variant="secondary" onPress={() => void refetch()} />
-          </View>
-        ) : data ? (
-          <View style={styles.card}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {data.profile.display_name.charAt(0).toUpperCase()}
+          <View style={styles.identityText}>
+            <Text style={styles.name} numberOfLines={1}>
+              {data?.profile.display_name ?? 'Tu perfil'}
+            </Text>
+            {data?.user.email ? (
+              <Text style={styles.email} numberOfLines={1}>
+                {data.user.email}
               </Text>
-            </View>
-
-            <View style={styles.identity}>
-              <Text style={styles.name}>{data.profile.display_name}</Text>
-              {data.user.email ? <Text style={styles.email}>{data.user.email}</Text> : null}
-            </View>
+            ) : null}
           </View>
-        ) : null}
 
-        <View style={styles.card}>
-          <View style={styles.row}>
-            <Ionicons name="construct-outline" size={20} color={colors.textMuted} />
-            <Text style={styles.rowText}>Editar perfil y ajustes llegan en la fase 9</Text>
-          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </Pressable>
+
+        <View style={styles.menu}>
+          <MenuItem
+            icon="car-sport-outline"
+            label="Marcas"
+            onPress={() => router.push('/brands')}
+          />
+          <MenuItem
+            icon="person-outline"
+            label="Editar perfil"
+            onPress={() => router.push('/profile/edit')}
+            isLast
+          />
         </View>
 
         <Button
@@ -85,19 +87,37 @@ export default function MoreScreen() {
   );
 }
 
+function MenuItem({
+  icon,
+  label,
+  onPress,
+  isLast = false,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+  isLast?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [styles.item, isLast && styles.itemLast, pressed && styles.pressed]}
+    >
+      <Ionicons name={icon} size={20} color={colors.textSecondary} />
+      <Text style={styles.itemLabel}>{label}</Text>
+      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     gap: spacing.lg,
   },
-  heading: {
-    ...typography.h1,
-    color: colors.textPrimary,
-  },
-  stack: {
-    gap: spacing.md,
-  },
-  card: {
+  identity: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.lg,
@@ -106,7 +126,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.lg,
     padding: spacing.lg,
-    minHeight: 72,
+  },
+  identityText: {
+    flex: 1,
+    gap: 2,
   },
   avatar: {
     width: 52,
@@ -122,10 +145,6 @@ const styles = StyleSheet.create({
     ...typography.h2,
     color: colors.red,
   },
-  identity: {
-    flex: 1,
-    gap: spacing.xs,
-  },
   name: {
     ...typography.h3,
     color: colors.textPrimary,
@@ -134,15 +153,31 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSecondary,
   },
-  row: {
+  menu: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    overflow: 'hidden',
+  },
+  item: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    minHeight: TOUCH_TARGET + 8,
+    paddingHorizontal: spacing.lg,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  itemLast: {
+    borderBottomWidth: 0,
+  },
+  itemLabel: {
+    ...typography.body,
+    color: colors.textPrimary,
     flex: 1,
   },
-  rowText: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    flex: 1,
+  pressed: {
+    opacity: 0.75,
   },
 });

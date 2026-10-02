@@ -1,4 +1,5 @@
 import { FlashList } from '@shopify/flash-list';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
@@ -9,6 +10,7 @@ import type { Car } from '../../features/cars/api';
 import { CarCard } from '../../features/cars/components/CarCard';
 import { useCars, useToggleFavorite } from '../../features/cars/hooks';
 import { useBrand } from '../../features/brands/hooks';
+import { getBrandLogo } from '../../features/brands/logos';
 import { colors, radii, spacing, typography } from '../../theme';
 
 export default function BrandDetailScreen() {
@@ -63,6 +65,8 @@ export default function BrandDetailScreen() {
     );
   }
 
+  const logo = getBrandLogo(brand.slug, brand.logo_url);
+
   return (
     <Screen edges={['top']}>
       <ScreenHeader
@@ -78,9 +82,21 @@ export default function BrandDetailScreen() {
         numColumns={2}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          brand.description ? (
+          brand.description || logo ? (
             <View style={styles.description}>
-              <Text style={styles.descriptionText}>{brand.description}</Text>
+              {logo ? (
+                <Image
+                  source={logo}
+                  style={styles.logo}
+                  contentFit="contain"
+                  accessibilityElementsHidden
+                  importantForAccessibility="no"
+                />
+              ) : null}
+
+              {brand.description ? (
+                <Text style={styles.descriptionText}>{brand.description}</Text>
+              ) : null}
             </View>
           ) : null
         }
@@ -135,6 +151,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.lg,
+    gap: spacing.md,
+    alignItems: 'center',
+  },
+  logo: {
+    width: '100%',
+    height: 90,
   },
   descriptionText: {
     ...typography.caption,

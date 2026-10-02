@@ -41,11 +41,24 @@ export interface Paginated<T> {
   items: T[];
   nextCursor: string | null;
   hasMore: boolean;
+  /**
+   * Totales del filtro completo, no de esta página.
+   *
+   * La API solo los calcula en la primera: avanzar no los cambia. En las
+   * siguientes llegan como `null` y el cliente conserva los que ya tenía.
+   */
+  totalModels: number | null;
+  totalUnits: number | null;
 }
 
 interface Envelope<T> {
   data: T;
-  meta?: { next_cursor: string | null; has_more: boolean };
+  meta?: {
+    next_cursor: string | null;
+    has_more: boolean;
+    total_models?: number | null;
+    total_units?: number | null;
+  };
 }
 
 interface RequestOptions {
@@ -62,6 +75,12 @@ interface RequestOptions {
  */
 const REQUEST_TIMEOUT_MS = 12_000;
 const SESSION_TIMEOUT_MS = 8_000;
+
+/**
+ * El despertador tiene su propio límite, mucho más largo: arrancar un servicio
+ * dormido puede pasar del medio minuto y aquí nadie está esperando en pantalla.
+ */
+const WARM_UP_TIMEOUT_MS = 60_000;
 
 async function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -195,6 +214,29 @@ async function requestEnvelope<T>(path: string, options: RequestOptions): Promis
   });
 }
 
+/**
+ * Despierta la API al arrancar la app.
+ *
+ * Los planes gratuitos de hosting apagan el servicio tras un rato sin tráfico,
+ * y la petición que lo despierta puede tardar medio minuto. Si la primera en
+ * llegar es la del usuario, se come esa espera y parece que la app no funciona.
+ *
+ * Esto se lanza en cuanto abre la app: mientras escribe su correo y su
+ * contraseña, el servidor ya está levantándose. No bloquea nada ni avisa de
+ * nada —falla en silencio— porque es una optimización, no un requisito: si no
+ * funciona, la primera petición real simplemente tardará lo que tardaba.
+ *
+ * `/health` no requiere token, así que sirve incluso sin sesión.
+ */
+export function warmUpApi(): void {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), WARM_UP_TIMEOUT_MS);
+
+  void fetch(`${env.apiUrl}/health`, { signal: controller.signal })
+    .catch(() => undefined)
+    .finally(() => clearTimeout(timer));
+}
+
 export const api = {
   get: async <T>(path: string): Promise<T> => (await requestEnvelope<T>(path, {})).data,
 
@@ -216,6 +258,8 @@ export const api = {
       items: envelope.data,
       nextCursor: envelope.meta?.next_cursor ?? null,
       hasMore: envelope.meta?.has_more ?? false,
+      totalModels: envelope.meta?.total_models ?? null,
+      totalUnits: envelope.meta?.total_units ?? null,
     };
   },
 };

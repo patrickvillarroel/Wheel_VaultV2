@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../../../components/ui/Button';
+import { FavoriteButton } from '../../../components/ui/FavoriteButton';
 import { Screen } from '../../../components/ui/Screen';
 import { ScreenHeader } from '../../../components/ui/ScreenHeader';
 import { ErrorState, LoadingState } from '../../../components/ui/StateViews';
@@ -90,20 +91,12 @@ export default function CarDetailScreen() {
         subtitle={car.brand?.name}
         showBack
         right={
-          <Pressable
-            onPress={() => toggleFavorite.mutate({ id: car.id, isFavorite: !car.is_favorite })}
-            hitSlop={spacing.sm}
-            accessibilityRole="button"
-            accessibilityLabel={car.is_favorite ? 'Quitar de favoritos' : 'Marcar como favorito'}
-            accessibilityState={{ selected: car.is_favorite }}
-            style={styles.favorite}
-          >
-            <Ionicons
-              name={car.is_favorite ? 'heart' : 'heart-outline'}
-              size={24}
-              color={car.is_favorite ? colors.red : colors.textSecondary}
-            />
-          </Pressable>
+          <FavoriteButton
+            isFavorite={car.is_favorite}
+            onToggle={() => toggleFavorite.mutate({ id: car.id, isFavorite: !car.is_favorite })}
+            label={car.model}
+            size={26}
+          />
         }
       />
 

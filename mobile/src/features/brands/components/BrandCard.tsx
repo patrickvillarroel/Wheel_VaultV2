@@ -2,15 +2,32 @@ import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radii, spacing, typography } from '../../../theme';
 import type { Brand } from '../api';
+import { getBrandLogo } from '../logos';
 
 /**
  * Tarjeta cuadrada de marca, como el carrusel del diseño.
  *
- * El catálogo todavía no tiene logotipos (`logo_url` está vacío), así que de
- * momento se muestra el nombre. Cuando lleguen, la imagen sustituye al texto
- * sin tocar nada más.
+ * Si la marca no tiene logotipo —ni en la app ni en `logo_url`— se muestra su
+ * nombre. Eso mantiene el catálogo usable mientras se completan las imágenes,
+ * en lugar de dejar tarjetas en blanco.
  */
-export function BrandCard({ brand, onPress }: { brand: Brand; onPress: () => void }) {
+export function BrandCard({
+  brand,
+  onPress,
+  fill = false,
+}: {
+  brand: Brand;
+  onPress: () => void;
+  /**
+   * Ocupa el ancho que le dé su contenedor en lugar de medir 112 px.
+   *
+   * Lo usa la cuadrícula del catálogo: con un ancho fijo, tres columnas no
+   * caben en una pantalla de 320 pt y la tercera se sale.
+   */
+  fill?: boolean;
+}) {
+  const logo = getBrandLogo(brand.slug, brand.logo_url);
+
   return (
     <Pressable
       onPress={onPress}
@@ -18,10 +35,21 @@ export function BrandCard({ brand, onPress }: { brand: Brand; onPress: () => voi
       accessibilityLabel={
         brand.car_count > 0 ? `${brand.name}, ${brand.car_count} en tu colección` : brand.name
       }
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.card,
+        fill ? styles.cardFill : styles.cardFixed,
+        pressed && styles.pressed,
+      ]}
     >
-      {brand.logo_url ? (
-        <Image source={{ uri: brand.logo_url }} style={styles.logo} contentFit="contain" />
+      {logo ? (
+        <Image
+          source={logo}
+          style={styles.logo}
+          contentFit="contain"
+          // El nombre ya está en la etiqueta accesible del botón.
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        />
       ) : (
         <Text style={styles.name} numberOfLines={3}>
           {brand.name}
@@ -39,22 +67,33 @@ export function BrandCard({ brand, onPress }: { brand: Brand; onPress: () => voi
 
 const styles = StyleSheet.create({
   card: {
-    width: 104,
-    height: 104,
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: spacing.sm,
+    // Margen pequeño: los logotipos son anchos (del orden de 2,5:1) y con
+    // `contain` el ancho es lo que manda. Cada píxel de relleno se los come.
+    padding: spacing.xs,
+  },
+  cardFixed: {
+    width: 112,
+    height: 112,
+  },
+  cardFill: {
+    flex: 1,
+    aspectRatio: 1,
   },
   pressed: {
     opacity: 0.75,
   },
   logo: {
-    width: '80%',
-    height: '60%',
+    // Ocupa toda la caja: `contain` se encarga de respetar la proporción, así
+    // que un logotipo ancho se escala hasta tocar los lados y uno cuadrado
+    // hasta tocar arriba y abajo.
+    width: '100%',
+    height: '100%',
   },
   name: {
     ...typography.bodyStrong,

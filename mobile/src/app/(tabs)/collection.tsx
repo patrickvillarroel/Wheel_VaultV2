@@ -1,19 +1,41 @@
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { useCallback } from 'react';
-import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Fab, FAB_CLEARANCE } from '../../components/ui/Fab';
+import { FilterChips, type Chip } from '../../components/ui/FilterChips';
 import { Screen } from '../../components/ui/Screen';
 import { ScreenHeader } from '../../components/ui/ScreenHeader';
+import { TextField } from '../../components/ui/TextField';
 import { EmptyState, ErrorState, LoadingState } from '../../components/ui/StateViews';
 import type { Car } from '../../features/cars/api';
-import { CarCard } from '../../features/cars/components/CarCard';
+import { CarRow } from '../../features/cars/components/CarRow';
 import { useCars, useToggleFavorite } from '../../features/cars/hooks';
-import { colors, spacing } from '../../theme';
+import { useBrands } from '../../features/brands/hooks';
+import { colors, spacing, typography, TOUCH_TARGET } from '../../theme';
+
+type Sort = 'recent' | 'oldest';
 
 export default function CollectionScreen() {
   const router = useRouter();
   const toggleFavorite = useToggleFavorite();
+
+  const [brandId, setBrandId] = useState<string | null>(null);
+  const [sort, setSort] = useState<Sort>('recent');
+  const [isSearching, setIsSearching] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const { data: brands } = useBrands();
+
+  const filters = useMemo(
+    () => ({
+      brandId: brandId ?? undefined,
+      search: search.trim() || undefined,
+      sort,
+    }),
+    [brandId, search, sort],
+  );
 
   const {
     data,
@@ -25,18 +47,61 @@ export default function CollectionScreen() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useCars();
+  } = useCars(filters);
 
   const cars = data?.pages.flatMap((page) => page.items) ?? [];
-  const total = cars.length;
+
+  // Los totales solo viajan en la primera página; las siguientes traen `null`.
+  const totals = data?.pages[0];
+  const hasFilters = brandId !== null || search.trim().length > 0;
+
+  function clearFilters() {
+    setBrandId(null);
+    setSearch('');
+    setIsSearching(false);
+  }
+
+  const chips: Chip[] = [
+    {
+      key: 'all',
+      label: 'Todos',
+      icon: 'grid-outline',
+      isActive: !hasFilters,
+      onPress: clearFilters,
+    },
+    {
+      key: 'search',
+      label: 'Buscar',
+      icon: 'search-outline',
+      isActive: isSearching || search.length > 0,
+      onPress: () => {
+        setIsSearching((open) => !open);
+        if (isSearching) setSearch('');
+      },
+    },
+    {
+      key: 'sort',
+      label: sort === 'recent' ? 'Recientes' : 'Antiguos',
+      icon: 'time-outline',
+      isActive: sort === 'oldest',
+      onPress: () => setSort((current) => (current === 'recent' ? 'oldest' : 'recent')),
+    },
+    // Solo las marcas de las que el usuario tiene algo: filtrar por una marca
+    // sin carritos siempre daría una lista vacía.
+    ...(brands ?? [])
+      .filter((brand) => brand.car_count > 0)
+      .map((brand) => ({
+        key: brand.id,
+        label: brand.name,
+        isActive: brandId === brand.id,
+        onPress: () => setBrandId((current) => (current === brand.id ? null : brand.id)),
+      })),
+  ];
 
   const renderItem = useCallback(
     ({ item }: { item: Car }) => (
-      // La separación entre tarjetas va en una celda envolvente: FlashList no
-      // admite `columnWrapperStyle` y un `ItemSeparatorComponent` en una
-      // cuadricula se intercala tambien entre columnas.
       <View style={styles.cell}>
-        <CarCard
+        <CarRow
           car={item}
           onPress={() => router.push({ pathname: '/car/[id]', params: { id: item.id } })}
           onToggleFavorite={() =>
@@ -62,8 +127,18 @@ export default function CollectionScreen() {
       );
     }
 
-    if (total === 0) {
-      return (
+    if (cars.length === 0) {
+      // Con filtros activos, una lista vacía no significa lo mismo que una
+      // colección vacía: ofrecer "agregar carrito" ahí sería desorientador.
+      return hasFilters ? (
+        <EmptyState
+          icon="search-outline"
+          title="Sin resultados"
+          description="Ningún carrito coincide con este filtro."
+          actionLabel="Quitar filtros"
+          onAction={clearFilters}
+        />
+      ) : (
         <EmptyState
           illustration={require('../../../assets/images/no_inventory_load.png')}
           title="Tu colección está vacía"
@@ -79,7 +154,6 @@ export default function CollectionScreen() {
         data={cars}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        numColumns={2}
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl
@@ -110,8 +184,56 @@ export default function CollectionScreen() {
     <Screen edges={['top']}>
       <ScreenHeader
         title="Colección"
-        subtitle={total > 0 ? `${total} ${total === 1 ? 'carrito' : 'carritos'}` : undefined}
+        right={
+          hasFilters ? (
+            <Pressable
+              onPress={clearFilters}
+              hitSlop={spacing.sm}
+              accessibilityRole="button"
+              accessibilityLabel="Quitar los filtros y ver todos"
+              style={({ pressed }) => [styles.seeAll, pressed && styles.pressed]}
+            >
+              <Text style={styles.seeAllText}>Ver todos</Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.red} />
+            </Pressable>
+          ) : null
+        }
       />
+
+      <FilterChips chips={chips} />
+
+      {isSearching ? (
+        <View style={styles.search}>
+          <TextField
+            label="Buscar en tu colección"
+            icon="search-outline"
+            placeholder="Buscar por modelo…"
+            value={search}
+            onChangeText={setSearch}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoFocus
+            returnKeyType="search"
+          />
+        </View>
+      ) : null}
+
+      <View style={styles.header}>
+        {totals?.totalModels !== null && totals?.totalModels !== undefined ? (
+          <View style={styles.counts}>
+            <Ionicons name="car-sport" size={16} color={colors.red} />
+            <Text style={styles.countsText}>
+              {totals.totalModels} {totals.totalModels === 1 ? 'modelo' : 'modelos'}
+              {totals.totalUnits !== null ? (
+                <Text>
+                  {'  ·  '}
+                  {totals.totalUnits} {totals.totalUnits === 1 ? 'unidad' : 'unidades'}
+                </Text>
+              ) : null}
+            </Text>
+          </View>
+        ) : null}
+      </View>
 
       <View style={styles.content}>{renderContent()}</View>
 
@@ -121,21 +243,46 @@ export default function CollectionScreen() {
 }
 
 const styles = StyleSheet.create({
+  search: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  seeAll: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    minHeight: TOUCH_TARGET - 16,
+  },
+  seeAllText: {
+    ...typography.caption,
+    color: colors.red,
+    fontWeight: '600',
+  },
+  pressed: {
+    opacity: 0.6,
+  },
+  counts: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  countsText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
   content: {
     flex: 1,
   },
   list: {
-    // La mitad del margen: la otra mitad la pone cada celda, de modo que el
-    // hueco entre columnas y el margen exterior queden iguales.
-    paddingHorizontal: spacing.sm,
-    // El FAB tapa el final de la lista; sin este hueco la ultima fila queda
-    // debajo del boton y no se puede pulsar.
+    paddingHorizontal: spacing.lg,
     paddingBottom: FAB_CLEARANCE,
   },
   cell: {
-    flex: 1,
-    paddingHorizontal: spacing.sm,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.md,
   },
   footer: {
     paddingVertical: spacing.lg,

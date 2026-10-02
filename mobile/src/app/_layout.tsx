@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '../features/auth/AuthContext';
+import { warmUpApi } from '../lib/apiClient';
 import { queryClient } from '../lib/queryClient';
 import { colors } from '../theme';
 
@@ -65,6 +66,12 @@ function SessionGate() {
 }
 
 export default function RootLayout() {
+  // Se dispara una sola vez, al abrir la app: para cuando el usuario termine de
+  // iniciar sesión, el servidor ya estará despierto.
+  useEffect(() => {
+    warmUpApi();
+  }, []);
+
   return (
     <SafeAreaProvider>
       {/* AuthProvider va dentro del de queries: al cerrar sesión vacía el cache. */}
