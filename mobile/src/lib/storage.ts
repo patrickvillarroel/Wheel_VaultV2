@@ -110,6 +110,50 @@ export async function getSignedUrl(path: string, expiresInSeconds = 3600): Promi
   return data.signedUrl;
 }
 
+/**
+ * Firma varias rutas en una sola peticion.
+ *
+ * Existe porque una lista de mil autos son mil fotos, y firmarlas de una en
+ * una es una ida y vuelta a Supabase por tarjeta. Con una colección pequeña no
+ * se nota; desplazando un inventario grande es la diferencia entre una peticion
+ * y cientos.
+ *
+ * Devuelve un mapa y no un array para que quien llama no dependa de que el
+ * orden de la respuesta coincida con el de la petición. Una ruta que falle sale
+ * como `null`, igual que en `getSignedUrl`: la tarjeta cae a su marcador.
+ */
+export async function getSignedUrls(
+  paths: string[],
+  expiresInSeconds = 3600,
+): Promise<Map<string, string | null>> {
+  const urls = new Map<string, string | null>();
+
+  if (paths.length === 0) return urls;
+
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrls(paths, expiresInSeconds);
+
+  // Un fallo global deja todas en null en vez de lanzar: que no haya fotos es
+  // degradarse, no romperse.
+  if (error || !data) {
+    for (const path of paths) urls.set(path, null);
+    return urls;
+  }
+
+  for (const entry of data) {
+    if (entry.path) urls.set(entry.path, entry.error ? null : entry.signedUrl);
+  }
+
+  // Si Supabase omite alguna ruta, quien espera su promesa tiene que recibir
+  // algo igualmente o se queda colgado para siempre.
+  for (const path of paths) {
+    if (!urls.has(path)) urls.set(path, null);
+  }
+
+  return urls;
+}
+
 /** Al borrar un auto, su foto se va con él. */
 export async function deleteCarImage(path: string): Promise<void> {
   // Si falla, se queda un archivo huérfano: molesto, pero no es motivo para

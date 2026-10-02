@@ -71,7 +71,10 @@ export async function listBrandCars(
   return carsService.listCars(db, userId, {
     ...query,
     brand_id: brandId,
-    // Esta pantalla no busca por modelo; filtra solo por marca.
+    // Esta pantalla no busca por modelo ni separa favoritos; filtra solo por
+    // marca. Se pasan explicitamente para que añadir un filtro nuevo a
+    // `listCars` obligue a decidir aqui qué hace, en vez de heredarlo sin más.
     q: undefined,
+    favorite: undefined,
   });
 }

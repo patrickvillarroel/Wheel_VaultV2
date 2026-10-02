@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { colors, radii, spacing, typography } from '../../../theme';
 import type { Brand } from '../api';
 import { getBrandLogo } from '../logos';
@@ -32,9 +32,7 @@ export function BrandCard({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={
-        brand.car_count > 0 ? `${brand.name}, ${brand.car_count} en tu colección` : brand.name
-      }
+      accessibilityLabel={brand.name}
       style={({ pressed }) => [
         styles.card,
         fill ? styles.cardFill : styles.cardFixed,
@@ -55,12 +53,6 @@ export function BrandCard({
           {brand.name}
         </Text>
       )}
-
-      {brand.car_count > 0 ? (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{brand.car_count}</Text>
-        </View>
-      ) : null}
     </Pressable>
   );
 }
@@ -98,23 +90,6 @@ const styles = StyleSheet.create({
   name: {
     ...typography.bodyStrong,
     color: colors.textPrimary,
-    textAlign: 'center',
-  },
-  badge: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    minWidth: 22,
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 1,
-    borderRadius: radii.full,
-    backgroundColor: colors.redSoft,
-    borderWidth: 1,
-    borderColor: colors.red,
-  },
-  badgeText: {
-    ...typography.label,
-    color: colors.red,
     textAlign: 'center',
   },
 });

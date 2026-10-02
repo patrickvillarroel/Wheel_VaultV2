@@ -26,6 +26,8 @@ export interface ListCarsParams {
   cursor?: string | undefined;
   brandId?: string | undefined;
   search?: string | undefined;
+  /** `true` pide solo los favoritos. La API no admite el caso contrario. */
+  favorite?: boolean | undefined;
   sort?: 'recent' | 'oldest';
 }
 
@@ -36,6 +38,9 @@ function toQueryString(params: ListCarsParams): string {
   if (params.cursor) query.set('cursor', params.cursor);
   if (params.brandId) query.set('brand_id', params.brandId);
   if (params.search) query.set('q', params.search);
+  // Solo se envía cuando está activo: `favorite=false` no significa nada para
+  // la API y ensuciaría la URL de las peticiones normales.
+  if (params.favorite) query.set('favorite', 'true');
   if (params.sort) query.set('sort', params.sort);
 
   const serialized = query.toString();

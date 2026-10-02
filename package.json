@@ -9,7 +9,7 @@
     "mobile"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "dev:api": "npm run dev --workspace=api",
@@ -21,10 +21,13 @@
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
     "db:types": "node scripts/gen-types.mjs",
+    "gen:icons": "node scripts/gen-icons.mjs",
+    "optimize:logos": "node scripts/optimize-brand-logos.mjs",
     "smoke": "node scripts/smoke-test.mjs",
     "dev:mobile": "npm run start --workspace=mobile",
     "check:secrets": "node scripts/check-secrets.mjs",
-    "verify": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run check:secrets"
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run check:secrets",
+    "diagnose": "node scripts/diagnose-api.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -33,5 +36,10 @@
     "prettier": "^3.9.9",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.0"
+  },
+  "dependencies": {
+    "expo": "~57.0.26",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
   }
 }

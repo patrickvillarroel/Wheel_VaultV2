@@ -3,9 +3,10 @@ import { updateProfileSchema, type UpdateProfileInput } from '@wheel-vault/share
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Banner } from '../../components/ui/Banner';
 import { Button } from '../../components/ui/Button';
+import { KeyboardAwareScroll } from '../../components/ui/KeyboardAwareScroll';
 import { Screen } from '../../components/ui/Screen';
 import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { TextField } from '../../components/ui/TextField';
@@ -66,51 +67,45 @@ export default function EditProfileScreen() {
     <Screen edges={['top']}>
       <ScreenHeader title="Editar perfil" showBack />
 
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {serverError ? <Banner tone="error" message={serverError} /> : null}
+      <KeyboardAwareScroll contentContainerStyle={styles.content}>
+        {serverError ? <Banner tone="error" message={serverError} /> : null}
 
-          <Controller
-            control={control}
-            name="display_name"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextField
-                label="Nombre"
-                icon="person-outline"
-                placeholder="Tu nombre"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.display_name?.message}
-                autoCapitalize="words"
-                autoComplete="name"
-                returnKeyType="go"
-                onSubmitEditing={onSubmit}
-              />
-            )}
-          />
+        <Controller
+          control={control}
+          name="display_name"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextField
+              label="Nombre"
+              icon="person-outline"
+              placeholder="Tu nombre"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={errors.display_name?.message}
+              autoCapitalize="words"
+              autoComplete="name"
+              returnKeyType="go"
+              onSubmitEditing={onSubmit}
+            />
+          )}
+        />
 
-          <View style={styles.readonly}>
-            <Text style={styles.readonlyLabel}>Correo</Text>
-            <Text style={styles.readonlyValue}>{data.user.email ?? '—'}</Text>
-            <Text style={styles.readonlyHint}>
-              Cambiar el correo requiere confirmarlo desde tu bandeja. Todavía no está disponible en
-              la app.
-            </Text>
-          </View>
+        <View style={styles.readonly}>
+          <Text style={styles.readonlyLabel}>Correo</Text>
+          <Text style={styles.readonlyValue}>{data.user.email ?? '—'}</Text>
+          <Text style={styles.readonlyHint}>
+            Cambiar el correo requiere confirmarlo desde tu bandeja. Todavía no está disponible en
+            la app.
+          </Text>
+        </View>
 
-          <Button label="Guardar cambios" onPress={onSubmit} isLoading={updateProfile.isPending} />
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <Button label="Guardar cambios" onPress={onSubmit} isLoading={updateProfile.isPending} />
+      </KeyboardAwareScroll>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.huge,

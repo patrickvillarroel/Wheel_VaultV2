@@ -17,7 +17,7 @@ Añadir endpoints espejo solo agregaría un salto de red y superficie de ataque.
 |---|---|---|
 | `GET` | `/health` | Sin auth. Para el healthcheck del hosting |
 | `GET` | `/me` | Sesión + perfil en una sola llamada (evita doble request al arrancar) |
-| `GET` | `/cars` | Lista paginada. `?limit=&cursor=&brand_id=&q=&sort=recent\|oldest` |
+| `GET` | `/cars` | Lista paginada. `?limit=&cursor=&brand_id=&q=&favorite=true&sort=recent\|oldest` |
 | `POST` | `/cars` | Crea. `201` + header `Location` |
 | `GET` | `/cars/:id` | Detalle |
 | `PATCH` | `/cars/:id` | Actualización **parcial**. Acepta `image_path`, validada contra `<user_id>/<car_id>.jpg` |
@@ -32,6 +32,11 @@ Añadir endpoints espejo solo agregaría un salto de red y superficie de ataque.
 **PATCH y no PUT**: con PUT el cliente debe reenviar el recurso completo y puede
 borrar campos sin querer. En una pantalla de edición parcial, PATCH es lo
 correcto.
+
+**`favorite` solo acepta `true`**. Deja únicamente los favoritos; cualquier otro
+valor, o su ausencia, no filtra. No existe «solo los NO favoritos» porque
+ninguna pantalla lo pide, y admitirlo invitaría a construir esa consulta sin
+querer. Los totales de `meta` se calculan con el mismo filtro que la lista.
 
 El email no se edita por aquí: lo cambia Supabase Auth con su propio flujo de
 confirmación.

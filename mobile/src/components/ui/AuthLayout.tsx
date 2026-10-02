@@ -2,8 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { colors, gradients, radii, spacing, typography } from '../../theme';
+import { KeyboardAwareScroll } from './KeyboardAwareScroll';
 import { Screen } from './Screen';
 import { Wordmark } from './Wordmark';
 
@@ -11,7 +12,7 @@ import { Wordmark } from './Wordmark';
  * Estructura comun de las pantallas de autenticación, tomada del diseño:
  * degradado oscuro, logotipo, eslogan y una tarjeta con el formulario.
  *
- * El `KeyboardAvoidingView` no es un detalle: en estas pantallas el teclado
+ * El `KeyboardAwareScroll` no es un detalle: en estas pantallas el teclado
  * tapa justo el campo de contraseña y el boton de enviar.
  */
 export function AuthLayout({
@@ -54,43 +55,33 @@ export function AuthLayout({
         style={StyleSheet.absoluteFill}
       />
 
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.header}>
-            <Wordmark />
-            <Text style={styles.tagline}>
-              Tu colección, tu pasión.{'\n'}
-              <Text style={styles.taglineAccent}>Tu legado.</Text>
-            </Text>
+      <KeyboardAwareScroll contentContainerStyle={styles.scroll}>
+        <View style={styles.header}>
+          <Wordmark />
+          <Text style={styles.tagline}>
+            Tu colección, tu pasión.{'\n'}
+            <Text style={styles.taglineAccent}>Tu legado.</Text>
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.badge}>
+            <Ionicons name={icon} size={26} color={colors.textPrimary} />
           </View>
 
-          <View style={styles.card}>
-            <View style={styles.badge}>
-              <Ionicons name={icon} size={26} color={colors.textPrimary} />
-            </View>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subtitle}>{subtitle}</Text>
 
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.subtitle}>{subtitle}</Text>
+          <View style={styles.form}>{children}</View>
+        </View>
 
-            <View style={styles.form}>{children}</View>
-          </View>
-
-          {footer ? <View style={styles.footer}>{footer}</View> : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {footer ? <View style={styles.footer}>{footer}</View> : null}
+      </KeyboardAwareScroll>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',

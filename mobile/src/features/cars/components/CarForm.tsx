@@ -7,9 +7,10 @@ import {
   type CreateCarInput,
 } from '@wheel-vault/shared';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Banner } from '../../../components/ui/Banner';
 import { Button } from '../../../components/ui/Button';
+import { KeyboardAwareScroll } from '../../../components/ui/KeyboardAwareScroll';
 import { QuantityStepper } from '../../../components/ui/QuantityStepper';
 import { TextField } from '../../../components/ui/TextField';
 import { colors, spacing, typography } from '../../../theme';
@@ -69,144 +70,130 @@ export function CarForm({
   });
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {serverError ? <Banner tone="error" message={serverError} /> : null}
+    <KeyboardAwareScroll contentContainerStyle={styles.content}>
+      {serverError ? <Banner tone="error" message={serverError} /> : null}
 
-        <ImageField
-          localUri={localImageUri}
-          existingPath={existingImagePath}
-          onPick={onPickImage}
-          onClear={onClearImage}
-        />
+      <ImageField
+        localUri={localImageUri}
+        existingPath={existingImagePath}
+        onPick={onPickImage}
+        onClear={onClearImage}
+      />
 
-        <Controller
-          control={control}
-          name="brand_id"
-          render={({ field: { onChange, value } }) => (
-            <BrandPicker
-              value={value || null}
-              onChange={onChange}
-              error={errors.brand_id?.message}
-            />
-          )}
-        />
+      <Controller
+        control={control}
+        name="brand_id"
+        render={({ field: { onChange, value } }) => (
+          <BrandPicker value={value || null} onChange={onChange} error={errors.brand_id?.message} />
+        )}
+      />
 
-        <Controller
-          control={control}
-          name="model"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextField
-              label="Modelo del vehículo"
-              icon="car-outline"
-              placeholder="Modelo (911 GT3, Skyline GT-R…)"
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.model?.message}
-              autoCapitalize="words"
-              returnKeyType="next"
-            />
-          )}
-        />
+      <Controller
+        control={control}
+        name="model"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextField
+            label="Modelo del vehículo"
+            icon="car-outline"
+            placeholder="Modelo (911 GT3, Skyline GT-R…)"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            error={errors.model?.message}
+            autoCapitalize="words"
+            returnKeyType="next"
+          />
+        )}
+      />
 
-        <Controller
-          control={control}
-          name="vehicle_make"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextField
-              label="Marca del vehículo"
-              icon="business-outline"
-              placeholder="Marca del vehículo (Porsche, Nissan…)"
-              value={value ?? ''}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.vehicle_make?.message}
-              autoCapitalize="words"
-              returnKeyType="next"
-            />
-          )}
-        />
+      <Controller
+        control={control}
+        name="vehicle_make"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextField
+            label="Marca del vehículo"
+            icon="business-outline"
+            placeholder="Marca del vehículo (Porsche, Nissan…)"
+            value={value ?? ''}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            error={errors.vehicle_make?.message}
+            autoCapitalize="words"
+            returnKeyType="next"
+          />
+        )}
+      />
 
-        {/* El fabricante del modelo a escala y la marca del coche real son dos
+      {/* El fabricante del modelo a escala y la marca del coche real son dos
             cosas distintas y es justo donde la gente se confunde (ADR-004). */}
-        <Text style={styles.hint}>
-          El <Text style={styles.hintStrong}>fabricante</Text> es quien hace el modelo a escala (Hot
-          Wheels). La <Text style={styles.hintStrong}>marca del vehículo</Text> es la del coche real
-          (Porsche).
-        </Text>
+      <Text style={styles.hint}>
+        El <Text style={styles.hintStrong}>fabricante</Text> es quien hace el modelo a escala (Hot
+        Wheels). La <Text style={styles.hintStrong}>marca del vehículo</Text> es la del coche real
+        (Porsche).
+      </Text>
 
-        <Controller
-          control={control}
-          name="year"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextField
-              label="Año"
-              icon="calendar-outline"
-              placeholder={`Año (1900 - ${maxCarYear()})`}
-              value={String(value ?? '')}
-              // Se filtran los caracteres no numéricos en la entrada: si no,
-              // `Number('abc')` da NaN y el mensaje de error no diría nada útil.
-              onChangeText={(text) => {
-                const digits = text.replace(/[^0-9]/g, '');
-                onChange(digits === '' ? null : Number(digits));
-              }}
-              onBlur={onBlur}
-              error={errors.year?.message}
-              keyboardType="number-pad"
-              maxLength={4}
-              returnKeyType="next"
-            />
-          )}
-        />
+      <Controller
+        control={control}
+        name="year"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextField
+            label="Año"
+            icon="calendar-outline"
+            placeholder={`Año (1900 - ${maxCarYear()})`}
+            value={String(value ?? '')}
+            // Se filtran los caracteres no numéricos en la entrada: si no,
+            // `Number('abc')` da NaN y el mensaje de error no diría nada útil.
+            onChangeText={(text) => {
+              const digits = text.replace(/[^0-9]/g, '');
+              onChange(digits === '' ? null : Number(digits));
+            }}
+            onBlur={onBlur}
+            error={errors.year?.message}
+            keyboardType="number-pad"
+            maxLength={4}
+            returnKeyType="next"
+          />
+        )}
+      />
 
-        <Controller
-          control={control}
-          name="quantity"
-          render={({ field: { onChange, value } }) => (
-            // El valor por defecto lo aplica Zod al validar, pero la entrada
-            // del formulario puede llegar sin el.
-            <QuantityStepper value={value ?? 1} onChange={onChange} />
-          )}
-        />
+      <Controller
+        control={control}
+        name="quantity"
+        render={({ field: { onChange, value } }) => (
+          // El valor por defecto lo aplica Zod al validar, pero la entrada
+          // del formulario puede llegar sin el.
+          <QuantityStepper value={value ?? 1} onChange={onChange} />
+        )}
+      />
 
-        <Controller
-          control={control}
-          name="description"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextField
-              label="Notas"
-              icon="document-text-outline"
-              placeholder="Notas (edición, serie, dónde lo conseguiste…)"
-              value={value ?? ''}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.description?.message}
-              multiline
-              numberOfLines={4}
-              maxLength={CAR_LIMITS.description.max}
-              textAlignVertical="top"
-            />
-          )}
-        />
+      <Controller
+        control={control}
+        name="description"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextField
+            label="Notas"
+            icon="document-text-outline"
+            placeholder="Notas (edición, serie, dónde lo conseguiste…)"
+            value={value ?? ''}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            error={errors.description?.message}
+            multiline
+            numberOfLines={4}
+            maxLength={CAR_LIMITS.description.max}
+            textAlignVertical="top"
+          />
+        )}
+      />
 
-        <View style={styles.submit}>
-          <Button label={submitLabel} onPress={handleSubmit(onSubmit)} isLoading={isSubmitting} />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <View style={styles.submit}>
+        <Button label={submitLabel} onPress={handleSubmit(onSubmit)} isLoading={isSubmitting} />
+      </View>
+    </KeyboardAwareScroll>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.huge,

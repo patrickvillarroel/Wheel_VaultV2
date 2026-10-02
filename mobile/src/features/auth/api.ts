@@ -1,5 +1,6 @@
 import type { AuthError } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
+import { EMAIL_CONFIRMED_URL, RESET_PASSWORD_URL } from './deepLinks';
 
 /**
  * Operaciones de autenticación.
@@ -8,9 +9,6 @@ import { supabase } from '../../lib/supabase';
  * añade esta capa es traducir los errores: Supabase los devuelve en ingles y
  * algunos son demasiado técnicos para enseñarselos a alguien.
  */
-
-/** Deep link del correo de recuperación. Debe coincidir con `scheme` en app.json. */
-const RESET_REDIRECT_URL = 'wheelvault://reset-password';
 
 export class AuthFailure extends Error {
   constructor(message: string) {
@@ -68,9 +66,14 @@ export async function signUp(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    // Llega a auth.users.raw_user_meta_data, de donde lo lee el trigger
-    // handle_new_user() para crear el perfil.
-    options: { data: { display_name: displayName } },
+    options: {
+      // Llega a auth.users.raw_user_meta_data, de donde lo lee el trigger
+      // handle_new_user() para crear el perfil.
+      data: { display_name: displayName },
+      // Sin esto, el enlace de confirmación lleva al Site URL del proyecto
+      // —una página web— en vez de devolver a quien se registra a la app.
+      emailRedirectTo: EMAIL_CONFIRMED_URL,
+    },
   });
 
   if (error) throw translate(error);
@@ -101,7 +104,7 @@ export async function signOut(): Promise<void> {
 
 export async function requestPasswordReset(email: string): Promise<void> {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: RESET_REDIRECT_URL,
+    redirectTo: RESET_PASSWORD_URL,
   });
 
   if (error) throw translate(error);

@@ -33,7 +33,7 @@ export async function listCars(
 ): Promise<CarsPage> {
   const cursor = query.cursor ? decodeCursor(query.cursor) : undefined;
 
-  const filters = { brandId: query.brand_id, search: query.q };
+  const filters = { brandId: query.brand_id, search: query.q, favorite: query.favorite };
 
   // Los totales solo se calculan en la primera página: no cambian al avanzar y
   // el cliente ya los tiene. En las siguientes viajan como `null`, que el móvil

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Collector's Project",
+    "name": "Collectors Project",
     "slug": "collectors-project",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -16,10 +16,8 @@
     "android": {
       "package": "com.collectorsproject.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0A0A0A",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -33,15 +31,34 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0A0A0A",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 160
+          "backgroundColor": "#000000",
+          "image": "./assets/images/LogotipoB.png",
+          "imageWidth": 200
+        }
+      ],
+      [
+        "react-native-document-scanner-plugin",
+        {
+          "cameraPermission": "Collectors Project usa la cámara para escanear el blister de tus carritos y recortarlo automáticamente."
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8ca15297-1efe-4593-8f35-3a529aaacd15"
+      }
+    },
+    "owner": "patrichenko",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8ca15297-1efe-4593-8f35-3a529aaacd15"
     }
   }
 }

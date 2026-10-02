@@ -23,6 +23,22 @@ export const listCarsQuerySchema = paginationQuerySchema.extend({
     .transform((value) => (value === '' ? undefined : value)),
 
   /**
+   * `favorite=true` deja solo los favoritos.
+   *
+   * Cualquier otro valor, o su ausencia, no filtra. No se acepta `false` como
+   * "solo los NO favoritos" a proposito: ninguna pantalla lo pide, y admitirlo
+   * invitaria a construir esa consulta sin querer desde el cliente.
+   *
+   * Se declara como enum de cadenas y no con `z.coerce.boolean()`: la coercion
+   * de Zod convierte cualquier cadena no vacia en `true`, asi que `favorite=0`
+   * o `favorite=false` filtrarian justo al reves de lo que dicen.
+   */
+  favorite: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((value) => (value === 'true' ? true : undefined)),
+
+  /**
    * Solo por fecha de alta.
    *
    * Ordenar por nombre requiere un cursor compuesto sobre (model, id), y el

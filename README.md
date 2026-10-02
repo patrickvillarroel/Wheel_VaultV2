@@ -40,7 +40,12 @@ su propio inventario y solo puede ver y modificar lo que le pertenece.
 
 ## Puesta en marcha
 
-Requisitos: **Node.js 20 o superior** y una cuenta de Supabase (gratuita).
+Requisitos: **Node.js 22 o superior** y una cuenta de Supabase (gratuita).
+
+> Node 22 no es una preferencia: `createClient` de supabase-js monta un cliente
+> de Realtime que necesita el `WebSocket` global, y ese global no existe antes
+> de Node 22. Con Node 20 la API arranca pero falla en la primera petición
+> autenticada.
 
 ```bash
 npm install
@@ -79,6 +84,7 @@ curl http://localhost:4000/health
 | `npm run verify` | Todo lo anterior de una vez: lo mismo que ejecuta CI |
 | `npm run check:secrets` | Busca secretos en lo que Git rastrea |
 | `npm run smoke` | Prueba de humo contra la API y la base de datos reales |
+| `npm run diagnose -- <url>` | Localiza por qué una API desplegada devuelve 500 |
 | `npm run db:types` | Regenera los tipos TypeScript desde el esquema (requiere `supabase link`) |
 
 ## Reglas del proyecto

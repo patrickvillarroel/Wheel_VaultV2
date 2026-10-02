@@ -39,6 +39,8 @@ export interface CarRow {
 export interface ListParams {
   brandId?: string | undefined;
   search?: string | undefined;
+  /** `true` deja solo los favoritos; `undefined` no filtra. */
+  favorite?: boolean | undefined;
   ascending: boolean;
   cursor?: Cursor | undefined;
   /** El servicio pide una fila de más para saber si hay pagina siguiente. */
@@ -69,6 +71,10 @@ export async function list(db: DbClient, userId: string, params: ListParams): Pr
 
   if (params.search) {
     query = query.ilike('model', `%${escapeLikePattern(params.search)}%`);
+  }
+
+  if (params.favorite) {
+    query = query.eq('is_favorite', true);
   }
 
   if (params.cursor) {
@@ -130,13 +136,16 @@ export interface Totals {
 export async function totalsForFilters(
   db: DbClient,
   userId: string,
-  params: Pick<ListParams, 'brandId' | 'search'>,
+  params: Pick<ListParams, 'brandId' | 'search' | 'favorite'>,
 ): Promise<Totals> {
   function base() {
     let query = db.from('cars').select('quantity').eq('user_id', userId);
 
+    // Los mismos filtros que `list`, sin excepcion: unos totales calculados
+    // sobre un conjunto distinto del que se lista son peor que no mostrarlos.
     if (params.brandId) query = query.eq('brand_id', params.brandId);
     if (params.search) query = query.ilike('model', `%${escapeLikePattern(params.search)}%`);
+    if (params.favorite) query = query.eq('is_favorite', true);
 
     return query;
   }

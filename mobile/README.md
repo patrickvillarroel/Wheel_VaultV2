@@ -55,6 +55,51 @@ src/
 4. Los límites de validación se importan de `@wheel-vault/shared` para que el
    móvil y la API validen exactamente lo mismo.
 
+## Escanear el blister
+
+Al añadir la foto de un carrito hay tres orígenes: **escanear**, cámara y
+galería. El escáner usa el detector de documentos del sistema —VisionKit en iOS,
+Document Scanner de ML Kit en Android— porque un blister es un rectángulo de
+cartón sobre una mesa, que es justo el problema que esos SDK ya resuelven:
+detectan los bordes, corrigen la perspectiva y devuelven el cartón recortado.
+
+Es **una opción, no el camino único**. Muchos carritos están fuera del blister y
+esos entran por cámara o galería como siempre.
+
+### Necesita una build de desarrollo
+
+`react-native-document-scanner-plugin` es un módulo nativo, así que **no está en
+el binario de Expo Go**. La app sigue arrancando en Expo Go: el módulo se carga
+con un `import()` dinámico dentro de
+[`scanBlister.ts`](src/features/cars/scanBlister.ts), no al cargar la pantalla,
+y si no está, el escáner avisa de que no está disponible en vez de reventar. Lo
+único que no funciona ahí es escanear.
+
+Para probarlo de verdad hay que compilar:
+
+```bash
+npx expo run:android
+```
+
+O, si no tienes el SDK de Android instalado, con EAS (el perfil `development` de
+`eas.json` ya tiene `developmentClient: true`):
+
+```bash
+eas build --profile development --platform android
+```
+
+Después, `npm run dev:mobile` y abrir el proyecto desde esa app en vez de desde
+Expo Go. Mientras no cambien las dependencias nativas no hay que recompilar: el
+JavaScript se sigue recargando igual.
+
+Con `expo-dev-client` instalado, Metro arranca apuntando a la build de
+desarrollo. Para volver a Expo Go se pulsa **`s`** en la terminal de Metro, que
+cambia entre los dos modos.
+
+> En Android el escáner lo sirve Google Play Services. Un emulador sin Play
+> Store o un móvil sin servicios de Google no lo tiene, y la app cae al aviso de
+> "escáner no disponible".
+
 ## Generar un APK
 
 La app no lleva la API dentro: para usarla fuera de tu red hay que desplegarla y

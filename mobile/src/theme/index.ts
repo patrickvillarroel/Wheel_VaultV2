@@ -25,6 +25,17 @@ export const colors = {
   redDark: '#8E0F14',
   redSoft: 'rgba(224, 31, 38, 0.12)',
 
+  /**
+   * El rojo de marca subido de tono, para el marco de los favoritos.
+   *
+   * Un neon no es un borde de color: es un tubo claro —casi blanco en el
+   * centro— rodeado de su propio resplandor. `neon` es ese tubo y `neonGlow`
+   * el halo que lo envuelve. El rojo de marca sin aclarar no llega: sobre el
+   * #141414 de la tarjeta se lee como un borde más, no como algo encendido.
+   */
+  neon: '#FF4D57',
+  neonGlow: 'rgba(255, 45, 60, 0.85)',
+
   textPrimary: '#FFFFFF',
   textSecondary: '#9A9A9A',
   textMuted: '#6B6B6B',
@@ -36,6 +47,16 @@ export const colors = {
   success: '#2BBF6A',
 
   overlay: 'rgba(0, 0, 0, 0.6)',
+
+  /**
+   * Negro puro del splash, y solo del splash.
+   *
+   * No es `background`: la placa de LogotipoB.png es #000000 exacto, y sobre el
+   * #0A0A0A del resto de la app se recortaba la silueta cuadrada del PNG contra
+   * el velo. Tiene que seguir coincidiendo con el `backgroundColor` del plugin
+   * expo-splash-screen en app.json.
+   */
+  splash: '#000000',
 } as const;
 
 /** Gradientes del diseño: el botón principal y el velo sobre la fotografía. */
@@ -104,11 +125,38 @@ export const typography = {
  */
 export const TOUCH_TARGET = 44;
 
+/**
+ * Entrada escalonada de listas y secciones.
+ *
+ * Cada elemento sube un poco y aparece, con un retardo segun su posicion, de
+ * forma que la pantalla se va componiendo de arriba abajo en vez de plantarse
+ * entera de golpe. Es lo bastante corta como para no estorbar a quien ya sabe
+ * lo que viene a buscar.
+ *
+ * Vive en el tema y no en cada pantalla porque la cadencia tiene que ser la
+ * misma en toda la app: dos listas que entran a ritmos distintos se notan.
+ */
+export const motion = {
+  /** Retardo entre un elemento y el siguiente. */
+  stagger: 55,
+  /** Lo que tarda cada elemento en aparecer. */
+  duration: 320,
+  /**
+   * Cuantos elementos se escalonan: una pantalla, poco mas. Escalonar los
+   * siguientes solo retrasaria cosas que nadie esta mirando todavia.
+   */
+  count: 8,
+} as const;
+
+/** Lo que tarda el ultimo en terminar. Pasado eso, nada mas deberia animarse. */
+export const MOTION_WINDOW = motion.stagger * motion.count + motion.duration;
+
 export const theme = {
   colors,
   gradients,
   spacing,
   radii,
   typography,
+  motion,
   TOUCH_TARGET,
 } as const;

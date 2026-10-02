@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 import { Fab, FAB_CLEARANCE } from '../../components/ui/Fab';
 import { FilterChips, type Chip } from '../../components/ui/FilterChips';
 import { Screen } from '../../components/ui/Screen';
@@ -13,28 +14,46 @@ import type { Car } from '../../features/cars/api';
 import { CarRow } from '../../features/cars/components/CarRow';
 import { useCars, useToggleFavorite } from '../../features/cars/hooks';
 import { useBrands } from '../../features/brands/hooks';
-import { colors, spacing, typography, TOUCH_TARGET } from '../../theme';
+import { useDebouncedValue } from '../../lib/useDebouncedValue';
+import { colors, motion, MOTION_WINDOW, spacing, typography, TOUCH_TARGET } from '../../theme';
 
 type Sort = 'recent' | 'oldest';
+
+/**
+ * Lo que se espera desde la ultima tecla antes de consultar.
+ *
+ * Suficiente para que una palabra escrita del tiron salga en una sola peticion,
+ * y poco para que no se perciba como lentitud al terminar de escribir.
+ */
+const SEARCH_DEBOUNCE_MS = 350;
 
 export default function CollectionScreen() {
   const router = useRouter();
   const toggleFavorite = useToggleFavorite();
 
   const [brandId, setBrandId] = useState<string | null>(null);
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [sort, setSort] = useState<Sort>('recent');
   const [isSearching, setIsSearching] = useState(false);
   const [search, setSearch] = useState('');
+
+  // El campo pinta `search` y la consulta usa esto: escribir sigue siendo
+  // instantaneo, pero la red solo se toca cuando hay una pausa.
+  const debouncedSearch = useDebouncedValue(search.trim(), SEARCH_DEBOUNCE_MS);
 
   const { data: brands } = useBrands();
 
   const filters = useMemo(
     () => ({
       brandId: brandId ?? undefined,
-      search: search.trim() || undefined,
+      search: debouncedSearch || undefined,
+      // `undefined` y no `false`: así desactivarlo deja la misma clave de caché
+      // que no haberlo tocado nunca, y la lista sin filtrar no se vuelve a
+      // pedir al quitar el filtro.
+      favorite: onlyFavorites || undefined,
       sort,
     }),
-    [brandId, search, sort],
+    [brandId, onlyFavorites, debouncedSearch, sort],
   );
 
   const {
@@ -53,10 +72,39 @@ export default function CollectionScreen() {
 
   // Los totales solo viajan en la primera página; las siguientes traen `null`.
   const totals = data?.pages[0];
-  const hasFilters = brandId !== null || search.trim().length > 0;
+  const hasFilters = brandId !== null || onlyFavorites || search.trim().length > 0;
+
+  // Hay quien tiene activado "reducir movimiento" porque las animaciones le
+  // provocan mareo. Una lista entera entrando en cascada es justo el caso.
+  const prefersReducedMotion = useReducedMotion();
+
+  /**
+   * La animación es solo para la entrada, y se apaga en cuanto termina.
+   *
+   * Sin esto se repetiría cada vez que una tarjeta vuelve a montarse: al
+   * subir de nuevo al principio de la lista, al filtrar, o con cada letra que
+   * se escribe en el buscador. Lo que debería ser un detalle de bienvenida
+   * acabaría siendo un parpadeo constante.
+   */
+  const isEntering = useRef(true);
+  const hasListAppeared = useRef(false);
+
+  useEffect(() => {
+    // Arranca cuando la lista aparece de verdad, no al montar la pantalla: los
+    // datos llegan de la red y la ventana se habría agotado esperándolos.
+    if (hasListAppeared.current || cars.length === 0) return;
+
+    hasListAppeared.current = true;
+    const timer = setTimeout(() => {
+      isEntering.current = false;
+    }, MOTION_WINDOW);
+
+    return () => clearTimeout(timer);
+  }, [cars.length]);
 
   function clearFilters() {
     setBrandId(null);
+    setOnlyFavorites(false);
     setSearch('');
     setIsSearching(false);
   }
@@ -68,6 +116,16 @@ export default function CollectionScreen() {
       icon: 'grid-outline',
       isActive: !hasFilters,
       onPress: clearFilters,
+    },
+    // Va el segundo, justo tras "Todos": es el filtro que más se usa al
+    // repasar una colección, y enterrarlo entre las marcas —que pueden ser
+    // una docena— lo dejaría fuera de pantalla.
+    {
+      key: 'favorites',
+      label: 'Favoritos',
+      icon: onlyFavorites ? 'heart' : 'heart-outline',
+      isActive: onlyFavorites,
+      onPress: () => setOnlyFavorites((current) => !current),
     },
     {
       key: 'search',
@@ -99,18 +157,29 @@ export default function CollectionScreen() {
   ];
 
   const renderItem = useCallback(
-    ({ item }: { item: Car }) => (
-      <View style={styles.cell}>
-        <CarRow
-          car={item}
-          onPress={() => router.push({ pathname: '/car/[id]', params: { id: item.id } })}
-          onToggleFavorite={() =>
-            toggleFavorite.mutate({ id: item.id, isFavorite: !item.is_favorite })
+    ({ item, index }: { item: Car; index: number }) => {
+      // `isEntering` se lee en el render, no es estado: cambiarlo no tiene que
+      // repintar la lista entera, solo dejar de animar lo que venga después.
+      const animate = isEntering.current && !prefersReducedMotion && index < motion.count;
+
+      return (
+        <Animated.View
+          style={styles.cell}
+          entering={
+            animate ? FadeInDown.delay(index * motion.stagger).duration(motion.duration) : undefined
           }
-        />
-      </View>
-    ),
-    [router, toggleFavorite],
+        >
+          <CarRow
+            car={item}
+            onPress={() => router.push({ pathname: '/car/[id]', params: { id: item.id } })}
+            onToggleFavorite={() =>
+              toggleFavorite.mutate({ id: item.id, isFavorite: !item.is_favorite })
+            }
+          />
+        </Animated.View>
+      );
+    },
+    [router, toggleFavorite, prefersReducedMotion],
   );
 
   function renderContent() {

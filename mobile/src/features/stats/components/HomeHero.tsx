@@ -1,22 +1,40 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Wordmark } from '../../../components/ui/Wordmark';
 import { colors, gradients, radii, spacing, typography, TOUCH_TARGET } from '../../../theme';
 
+/** Proporción de CarHome.png (334x279). Ata el alto al ancho que calculemos. */
+const CAR_ASPECT = 334 / 279;
+
+/**
+ * Cuánto del ancho de pantalla ocupa el coche.
+ *
+ * El coche acompaña al nombre, no compite con él: ocupa poco más de la mitad
+ * derecha y se sale por el borde. Atarlo al ancho de pantalla en vez de fijar
+ * píxeles es lo que hace que se vea igual en un iPhone SE que en un Pixel 8 Pro.
+ */
+const CAR_WIDTH_RATIO = 0.56;
+
+/** Tope para tablets: pasado este ancho el coche dejaría de ser un detalle. */
+const CAR_MAX_WIDTH = 280;
+
 /**
  * Cabecera de la pantalla de inicio: degradado rojo, logotipo y el coche.
  *
- * El diseño incluye además un botón de menú y una campana de notificaciones.
- * No están: no hay menú lateral ni notificaciones todavía, y un botón que no
- * hace nada se siente como una app rota. Entrarán con su función.
+ * El mockup lleva además un botón de menú hamburguesa y una campana de
+ * notificaciones. Quedan fuera por decisión de producto: no hay menú lateral
+ * ni notificaciones, y la barra solo necesita el acceso al perfil.
  */
 export function HomeHero({ onPressProfile }: { onPressProfile: () => void }) {
   // El hero pinta por debajo de la barra de estado, así que el contenido tiene
   // que bajar él mismo lo que mida la muesca del dispositivo.
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+
+  const carWidth = Math.min(width * CAR_WIDTH_RATIO, CAR_MAX_WIDTH);
 
   return (
     <View style={styles.root}>
@@ -30,7 +48,7 @@ export function HomeHero({ onPressProfile }: { onPressProfile: () => void }) {
 
       <Image
         source={require('../../../../assets/images/CarHome.png')}
-        style={styles.car}
+        style={[styles.car, { width: carWidth, height: carWidth / CAR_ASPECT }]}
         contentFit="contain"
         transition={400}
         accessibilityElementsHidden
@@ -49,7 +67,11 @@ export function HomeHero({ onPressProfile }: { onPressProfile: () => void }) {
           </Pressable>
         </View>
 
-        <Wordmark size="small" align="left" />
+        {/*
+          A tamaño completo y sin velocímetro: en el hero el nombre es el
+          protagonista y el icono solo le robaba alto.
+        */}
+        <Wordmark size="large" align="left" showGauge={false} />
 
         <Text style={styles.tagline}>
           Tu colección, tu pasión,{'\n'}
@@ -69,8 +91,9 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: spacing.lg,
-    // Deja aire bajo el eslogan para que el coche no empuje al texto.
-    paddingBottom: spacing.xxxl,
+    // Este hueco es lo que marca el alto del hero, y con él la altura a la que
+    // queda el coche: sin suficiente aire, el coche sube y pisa el nombre.
+    paddingBottom: spacing.huge,
     gap: spacing.md,
   },
   topBar: {
@@ -92,7 +115,7 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSecondary,
     // Deja sitio al coche, que se superpone por la derecha.
-    maxWidth: '62%',
+    maxWidth: '52%',
   },
   taglineStrong: {
     color: colors.textPrimary,
@@ -100,11 +123,10 @@ const styles = StyleSheet.create({
   },
   car: {
     position: 'absolute',
-    // Ancho y posición calculados para que el coche empiece a la derecha del
-    // logotipo: con 230 px se montaba encima y el texto quedaba ilegible.
-    right: -spacing.xl,
-    bottom: -spacing.md,
-    width: 200,
-    height: 167,
+    // El morro se sale del hero por la derecha, como en el diseño: el recorte
+    // lo hace el overflow:'hidden' de la raíz. El alto y el ancho los calcula
+    // el componente a partir del ancho de pantalla.
+    right: -spacing.lg,
+    bottom: -spacing.sm,
   },
 });

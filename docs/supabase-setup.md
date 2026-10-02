@@ -230,10 +230,43 @@ policies desde **Storage → Policies**; lo vemos cuando lleguemos a esa fase.
 - **Email** debe estar habilitado; Google, Apple y Facebook los dejamos
   apagados (decisión del MVP).
 
-**Authentication → URL Configuration**: esto lo necesitaremos en la **fase 3**
-para que el enlace del correo de "olvidé mi contraseña" abra la app. Cuando
-lleguemos ahí añadiremos `wheelvault://reset-password` a *Redirect URLs*. Por
-ahora déjalo como está.
+**Authentication → URL Configuration**: esto decide a dónde va el usuario al
+pulsar un enlace de correo. **Sin tocarlo, los enlaces llevan a
+`http://localhost:3000`**, que es el valor por defecto de Supabase y no existe
+en un teléfono.
+
+| Campo | Valor |
+|---|---|
+| **Site URL** | `wheelvault://` |
+| **Redirect URLs** | `wheelvault://**` |
+
+Las dos cosas, y cada una por su motivo:
+
+- **Redirect URLs** es una lista blanca. La app pide volver a
+  `wheelvault://reset-password` (recuperar contraseña) y a `wheelvault://`
+  (confirmar correo). Si esas direcciones no están en la lista, Supabase
+  **descarta la petición sin avisar** y usa el Site URL. Es un fallo silencioso:
+  el correo llega, el enlace funciona, y acaba en una página que no existe. El
+  comodín `**` cubre cualquier ruta, así que no hay que volver aquí al añadir
+  pantallas nuevas.
+
+- **Site URL** es el destino de reserva. Dejarlo en `localhost:3000` significa
+  que cualquier caso que se escape de la lista blanca sigue cayendo en una URL
+  muerta.
+
+Las direcciones salen de `mobile/src/features/auth/deepLinks.ts`, y el esquema
+`wheelvault` de `scheme` en `mobile/app.json`.
+
+> **Si pruebas con el servidor de desarrollo** en vez de con una build nativa,
+> ahí la dirección no es `wheelvault://` sino `exp://TU_IP:8081/--/...`. Añade
+> también `exp://**` a *Redirect URLs* mientras desarrolles, o prueba el flujo
+> directamente sobre la app compilada, que es lo que verá el usuario.
+
+> **Un enlace abierto desde el ordenador no va a funcionar.** `wheelvault://`
+> solo lo entiende un dispositivo con la app instalada. Para que el correo
+> funcione también desde un navegador de escritorio hace falta un dominio real
+> con App Links (Android) y Universal Links (iOS), que es bastante más trabajo.
+> Para el MVP basta con abrir el correo desde el móvil.
 
 > El plan Free usa un servidor de correo compartido con un límite bajo de envíos
 > por hora, pensado solo para pruebas. Antes de producción hay que conectar un

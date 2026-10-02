@@ -31,10 +31,17 @@ export function CarImage({
   path,
   style,
   iconSize = 32,
+  contentFit = 'cover',
 }: {
   path: string | null;
   style?: CarImageStyle;
   iconSize?: number;
+  /**
+   * `cover` para las tarjetas de las listas, donde lo que importa es que no
+   * queden huecos. `contain` para el detalle: ahí la foto es el contenido y
+   * recortar un blister por los lados se come la mitad del cartón.
+   */
+  contentFit?: 'cover' | 'contain';
 }) {
   const { data: url } = useCarImageUrl(path);
 
@@ -49,8 +56,11 @@ export function CarImage({
   return (
     <Image
       source={{ uri: url }}
-      style={[styles.image, style]}
-      contentFit="cover"
+      // El fondo opaco solo con `cover`: con `contain` la foto no llena la
+      // caja, y pintarlo taparía lo que haya detrás —que es justo el recurso
+      // que usa el detalle para rellenar los lados.
+      style={[contentFit === 'cover' && styles.image, style]}
+      contentFit={contentFit}
       transition={200}
       // Se cachea en disco: al volver a la lista la foto ya está, aunque la URL
       // firmada sea nueva.

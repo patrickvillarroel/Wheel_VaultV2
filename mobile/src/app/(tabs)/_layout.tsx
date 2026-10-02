@@ -26,6 +26,26 @@ export default function TabsLayout() {
         },
         tabBarLabelStyle: typography.label,
         sceneStyle: { backgroundColor: colors.background },
+
+        /*
+         * SIN animacion de pestaña, y es a proposito. No volver a poner
+         * `animation: 'shift'` sin leer esto.
+         *
+         * Con 'shift' la pantalla de Colección se quedaba en negro de vez en
+         * cuando al entrar. Las pestañas montan la pantalla la primera vez que
+         * se visitan (`lazy`, el valor por omision), asi que con animacion el
+         * escenario se monta y se desplaza a la vez: react-native-screens lo
+         * tiene separado mientras dura la transicion y a veces no lo vuelve a
+         * enganchar, y lo que queda es el fondo de la ventana.
+         *
+         * El movimiento no se pierde: cada pantalla tiene su propia entrada
+         * escalonada, que empieza justo al llegar.
+         *
+         * Si algun dia se quiere recuperar, el camino es `lazy: false` en estas
+         * mismas opciones —para que los escenarios ya esten montados y medidos
+         * antes de animar nada— y probarlo en un dispositivo real, no solo en
+         * el emulador.
+         */
       }}
     >
       <Tabs.Screen

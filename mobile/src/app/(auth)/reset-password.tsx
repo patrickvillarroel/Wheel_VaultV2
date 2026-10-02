@@ -13,9 +13,13 @@ import { useAuth } from '../../features/auth/AuthContext';
 /**
  * Pantalla a la que lleva el enlace del correo de recuperación.
  *
- * Supabase abre la app con una sesión ya iniciada, por eso esta ruta esta
- * exenta del gate en _layout.tsx. Sin sesión no hay nada que cambiar: el enlace
- * caducó o se llego aquí por otro camino.
+ * Al llegar aquí ya hay sesión: la instala `useAuthDeepLink` con los tokens
+ * que trae el propio enlace, antes de que el splash se retire. Por eso esta
+ * ruta esta exenta del gate en _layout.tsx —es la unica del grupo (auth) a la
+ * que se entra autenticado—.
+ *
+ * Sin sesión no hay nada que cambiar: el enlace caducó, ya se usó, o se llegó
+ * aquí por otro camino.
  */
 export default function ResetPasswordScreen() {
   const router = useRouter();

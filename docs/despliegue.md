@@ -179,23 +179,33 @@ Esto es lo que más confunde: **`mobile/.env` no llega a EAS**. Está en
 `.gitignore`, y EAS no sube los archivos ignorados. Si no haces este paso, el
 APK se construye sin configuración y revienta al arrancar.
 
-Las tres variables se crean **una vez** desde el panel de Expo:
+Las tres variables se crean **una vez**, desde `mobile/`:
 
-<https://expo.dev> → tu proyecto → **Environment variables** → **Create
-variable**, con el entorno **preview** marcado:
+```bash
+eas env:set preview --name EXPO_PUBLIC_API_URL --value "https://collectors-project-api.onrender.com" --visibility plaintext --scope project --non-interactive
+eas env:set preview --name EXPO_PUBLIC_SUPABASE_URL --value "https://TU-PROYECTO.supabase.co" --visibility plaintext --scope project --non-interactive
+eas env:set preview --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "TU_ANON_KEY" --visibility plaintext --scope project --non-interactive
+```
 
-| Variable | Valor |
-|---|---|
-| `EXPO_PUBLIC_API_URL` | `https://collectors-project-api.onrender.com` |
-| `EXPO_PUBLIC_SUPABASE_URL` | El de tu proyecto de Supabase |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | La anon key |
+Los dos valores de Supabase son los mismos de tu `mobile/.env`. El de la API
+**no**: en tu `.env` apunta a tu PC, y aquí tiene que ser la URL de Render.
 
-> Las tres acaban dentro del APK y son extraíbles de él: no son secretos de
-> verdad. La seguridad de la anon key la dan las policies RLS, no el ocultarla.
-> Por eso van como variables normales y no como secretos del build.
+Comprueba que quedaron las tres:
 
-También se pueden crear con `eas env:create`, pero el panel evita equivocarse
-con los nombres de los parámetros.
+```bash
+eas env:list preview
+```
+
+> `eas env:create` está deprecado en favor de `eas env:set`. El panel de Expo
+> también las deja crear, pero la opción no aparece en todas las cuentas; el
+> comando funciona siempre.
+
+> **Por qué `plaintext` y no `secret`**: las tres llevan el prefijo
+> `EXPO_PUBLIC_`, así que Metro las incrusta en el bundle y acaban dentro del
+> APK, de donde cualquiera puede extraerlas. Marcarlas como `secret` solo las
+> escondería de ti, y además `secret` no se puede leer durante el build, que es
+> cuando hacen falta. La seguridad de la anon key la dan las policies RLS, no
+> el ocultarla.
 
 ### 4. Construye
 
@@ -209,6 +219,30 @@ instalar a mano.
 
 El build tarda 10-20 minutos en los servidores de Expo. Al terminar te da un
 enlace de descarga y un código QR.
+
+### Si falla con «main module field could not be resolved»
+
+```
+While trying to resolve module `@wheel-vault/shared` ...
+this package itself specifies a `main` module field that could not be
+resolved (.../shared/dist/index.js)
+```
+
+`shared` es TypeScript y se publica compilado en `dist/`, que está en
+`.gitignore`. EAS clona el repositorio e instala las dependencias, pero no
+compila nada más, así que el paquete llega sin su `dist/` y Metro no lo
+encuentra. En local no se nota porque ahí `dist/` existe desde la primera vez
+que compilaste.
+
+Lo resuelve el script `prepare` de `shared/package.json`: npm lo ejecuta solo
+después de cada `npm install` y `npm ci`, también en el servidor de EAS. Si
+alguna vez vuelve a aparecer este error, comprueba que ese script sigue ahí.
+
+Se puede reproducir en local sin gastar un build:
+
+```bash
+rm -rf shared/dist && npm ci && ls shared/dist
+```
 
 ### 5. Instálalo
 

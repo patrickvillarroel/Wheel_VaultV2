@@ -138,6 +138,33 @@ describe('GET /api/v1/cars', () => {
     expect(vi.mocked(carsRepository.list).mock.calls[0]?.[2]).toMatchObject({ brandId: BRAND_ID });
   });
 
+  it('aplica el filtro de favoritos', async () => {
+    vi.mocked(carsRepository.list).mockResolvedValue([]);
+
+    await authed('get', '/api/v1/cars?favorite=true');
+
+    expect(vi.mocked(carsRepository.list).mock.calls[0]?.[2]).toMatchObject({ favorite: true });
+  });
+
+  it('favorite=false no filtra nada', async () => {
+    // El caso que romperia una coercion ingenua a booleano: cualquier cadena no
+    // vacia se convertiria en `true` y devolveria justo lo contrario.
+    vi.mocked(carsRepository.list).mockResolvedValue([]);
+
+    await authed('get', '/api/v1/cars?favorite=false');
+
+    expect(vi.mocked(carsRepository.list).mock.calls[0]?.[2]).toMatchObject({
+      favorite: undefined,
+    });
+  });
+
+  it('422 si favorite no es un valor permitido', async () => {
+    const response = await authed('get', '/api/v1/cars?favorite=1');
+
+    expect(response.status).toBe(422);
+    expect(carsRepository.list).not.toHaveBeenCalled();
+  });
+
   it('sort=oldest invierte el orden', async () => {
     vi.mocked(carsRepository.list).mockResolvedValue([]);
 
@@ -184,6 +211,20 @@ describe('GET /api/v1/cars', () => {
       expect.anything(),
       TEST_USER_ID,
       expect.objectContaining({ brandId: BRAND_ID }),
+    );
+  });
+
+  it('los totales respetan el filtro de favoritos', async () => {
+    // Unos totales calculados sobre un conjunto distinto del que se lista
+    // mostrarian "12 modelos" encima de una lista de 3.
+    vi.mocked(carsRepository.list).mockResolvedValue([]);
+
+    await authed('get', '/api/v1/cars?favorite=true');
+
+    expect(carsRepository.totalsForFilters).toHaveBeenCalledWith(
+      expect.anything(),
+      TEST_USER_ID,
+      expect.objectContaining({ favorite: true }),
     );
   });
 
