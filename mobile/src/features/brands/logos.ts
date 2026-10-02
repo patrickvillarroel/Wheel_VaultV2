@@ -23,9 +23,15 @@
  * `brands.logo_url` sigue existiendo y tiene prioridad sobre esta tabla: es la
  * vía para las marcas que cree un usuario (ADR-003), que sí viven en Storage.
  *
- * Formato recomendado: PNG con fondo transparente, unos 300 px de ancho.
- * Muchos logotipos de marca son oscuros y la app tiene fondo negro, así que
- * conviene la versión en blanco o en color claro cuando exista.
+ * Formato: PNG con fondo transparente. Muchos logotipos de marca son oscuros
+ * y la app tiene fondo negro, así que conviene la versión en blanco o en color
+ * claro cuando exista.
+ *
+ * El tamaño NO lo cuides a mano: deja el archivo como lo tengas y ejecuta
+ * `npm run optimize:logos`, que reduce todo a 360 px de lado. No es cosmético.
+ * La tarjeta mide 112 pt, pero un PNG se descomprime entero en memoria —`ancho
+ * x alto x 4` bytes— se dibuje al tamaño que se dibuje. Treinta logotipos a
+ * 2000 px eran 119 MB de mapas de bits y el carrusel iba a tirones.
  */
 
 /** Claves = `slug` de la marca. Si falta una, la tarjeta muestra el nombre. */
@@ -37,6 +43,31 @@ const LOGOS: Record<string, number> = {
   maisto: require('../../../assets/images/brands/maisto.png'),
   bburago: require('../../../assets/images/brands/bburago.png'),
   'mini-gt': require('../../../assets/images/brands/mini-gt.png'),
+  'auto-world': require('../../../assets/images/brands/auto-world.png'),
+  greenlight: require('../../../assets/images/brands/greenlight.png'),
+  inno64: require('../../../assets/images/brands/inno64.png'),
+  schuco: require('../../../assets/images/brands/schuco.png'),
+  'm2-machines': require('../../../assets/images/brands/m2-machines.png'),
+  'jada-toys': require('../../../assets/images/brands/jada.png'),
+  kyosho: require('../../../assets/images/brands/kyosho.png'),
+  minichamps: require('../../../assets/images/brands/minichamps.png'),
+  motormax: require('../../../assets/images/brands/motor-max.png'),
+  autoart: require('../../../assets/images/brands/autoart.png'),
+  'ixo-models': require('../../../assets/images/brands/ixo-models.png'),
+  'johnny-lightning': require('../../../assets/images/brands/johnny-lightning.png'),
+  kinsmart: require('../../../assets/images/brands/kinsmart.png'),
+  norev: require('../../../assets/images/brands/norev.png'),
+  'pop-race': require('../../../assets/images/brands/pop-race.png'),
+  'racing-champions': require('../../../assets/images/brands/racing-champions.png'),
+  revell: require('../../../assets/images/brands/revell.png'),
+  siku: require('../../../assets/images/brands/siku.png'),
+  solido: require('../../../assets/images/brands/solido.png'),
+  'spark-model': require('../../../assets/images/brands/spark.png'),
+  'tarmac-works': require('../../../assets/images/brands/tarmac.png'),
+  tomica: require('../../../assets/images/brands/tomica.png'),
+  welly: require('../../../assets/images/brands/welly.png'),
+  majorette: require('../../../assets/images/brands/majorette.png'),
+  otro: require('../../../assets/images/brands/other.png'),
 };
 
 /**
