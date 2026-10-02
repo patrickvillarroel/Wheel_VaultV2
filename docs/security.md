@@ -76,7 +76,19 @@ Express responde 401 AUTH_TOKEN_EXPIRED
       └ falla → signOut local + redirect a (auth)/login + limpieza del cache
 ```
 
-**Logout**: `signOut({ scope: 'local' })` + purga del cache de TanStack Query.
+**Logout**: `signOut()` —ámbito global, el que trae el SDK— más la purga del
+cache de TanStack Query. Revocar en el servidor mata el refresh token en todos
+los dispositivos.
+
+Si esa llamada falla por red, se reintenta con `scope: 'local'`: revocar en el
+servidor es lo deseable, pero borrar las credenciales de ese dispositivo es lo
+imprescindible. Dejar al usuario dentro de una app de la que acaba de pedir
+salir sería el peor resultado posible.
+
+> Limitación que permanece: el access token ya emitido sigue siendo
+> criptográficamente válido hasta su `exp` (1 h), porque Express lo verifica
+> localmente sin consultar a Supabase. Cerrarlo antes exigiría una llamada de
+> red en cada petición.
 
 ### Verificación del token en Express
 
@@ -129,6 +141,8 @@ que el id existe y filtra información.
 | Los autos de una marca siguen acotados por el `user_id` del token | `api/tests/brands.api.test.ts` | ✅ 7 |
 | El `car_count` de cada marca cuenta solo los autos del usuario | manual, [probar-la-api.md](probar-la-api.md) paso 6 | 7 |
 | `image_path` apuntando a la carpeta de otro usuario, o a otro auto, da 422 | `api/tests/cars.api.test.ts` | ✅ 5.5 |
+| `/stats/summary` exige token y cuenta solo la colección del usuario | `api/tests/stats.api.test.ts` | ✅ 8 |
+| `PATCH /profile` edita siempre el perfil del token e ignora `id` y `email` del cuerpo | `api/tests/profile.api.test.ts` | ✅ 9 |
 | Mismos casos de aislamiento contra una base de datos real, vía HTTP | pendiente | 10 |
 
 `rls_isolation.sql` se vuelve a ejecutar **cada vez que se toca una policy**.
@@ -149,13 +163,34 @@ en la lista de la fase 10.
 
 `api/` y `shared/` están en **0 vulnerabilidades**.
 
-## Pendientes antes de producción (fase 10)
+## Fase 10 — endurecimiento
 
-- [ ] Proveedor SMTP propio: el correo del plan Free es solo para pruebas
-- [ ] `npm audit` y revisión de dependencias
-- [ ] Escaneo de secretos (gitleaks) en CI
-- [ ] Proyecto Supabase separado para producción, con claves distintas
-- [ ] Revisar `scope: 'global'` en el logout
-- [ ] Rate limiting por usuario además de por IP
+Hecho:
+
+- [x] **CI** (`.github/workflows/ci.yml`): lint, formato, tipos, tests, búsqueda
+      de secretos y `npm audit` en cada push y cada PR
+- [x] **Detección de secretos** (`npm run check:secrets`): recorre lo que Git
+      rastrea buscando JWT, claves privadas y `SERVICE_ROLE_KEY`/`JWT_SECRET`
+      con valor asignado. Un `.env` versionado es un hallazgo por sí mismo. Se
+      silencia línea a línea con `check-secrets:permitido`, nunca por archivo
+- [x] **Rate limiting por usuario** en las escrituras, no por IP: detrás de un
+      NAT compartido varias personas se consumían el cupo entre ellas, y una
+      sola cuenta podía esquivarlo cambiando de red
+- [x] **Logout robusto**: ámbito global, con reintento local si falla la red
+- [x] **Tiempos límite en el cliente móvil**: 12 s por petición y 8 s sobre
+      `getSession()`. Sin ellos una pantalla se quedaba cargando indefinidamente
+      cuando la API no respondía
+
+Pendiente, y depende de ti:
+
+- [ ] **Proveedor SMTP propio**. El correo del plan Free de Supabase tiene un
+      límite bajo de envíos por hora y es solo para pruebas: con él, el registro
+      y la recuperación de contraseña fallan en cuanto haya usuarios de verdad
+- [ ] **Proyecto Supabase separado para producción**, con sus propias claves.
+      Hoy desarrollo y producción serían la misma base de datos, incluido el APK
+      de prueba ([despliegue.md](despliegue.md))
+- [ ] **Rotar las claves** si alguna llegó a un commit en algún momento: borrarla
+      del código no la saca del historial de Git
+- [ ] Mover el almacén del rate limiting a Redis si se despliega más de una
+      instancia: ahora está en memoria y cada instancia lleva su propia cuenta
 - [ ] Revisar las 14 vulnerabilidades transitivas de Expo cuando el SDK las suba
-- [ ] Repaso de los mensajes de error visibles al usuario

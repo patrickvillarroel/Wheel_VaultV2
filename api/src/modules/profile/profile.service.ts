@@ -1,4 +1,4 @@
-import { ERROR_CODES } from '@wheel-vault/shared';
+import { ERROR_CODES, type UpdateProfileInput } from '@wheel-vault/shared';
 import type { DbClient } from '../../config/supabase.js';
 import type { AuthenticatedUser } from '../../config/jwt.js';
 import { AppError } from '../../shared/errors/AppError.js';
@@ -49,4 +49,41 @@ export async function getMe(db: DbClient, user: AuthenticatedUser): Promise<MeRe
       updated_at: profile.updated_at,
     },
   };
+}
+
+export type Profile = MeResponse['profile'];
+
+function toProfile(row: Awaited<ReturnType<typeof profileRepository.findById>>): Profile {
+  if (!row) {
+    // No deberia ocurrir: el trigger handle_new_user() crea el perfil al
+    // registrarse. Si pasa, es un fallo real que conviene ver en los logs.
+    throw AppError.notFound(ERROR_CODES.PROFILE_NOT_FOUND, 'No se encontró el perfil del usuario');
+  }
+
+  return {
+    id: row.id,
+    display_name: row.display_name,
+    avatar_path: row.avatar_path,
+    bio: row.bio,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+export async function getProfile(db: DbClient, userId: string): Promise<Profile> {
+  return toProfile(await profileRepository.findById(db, userId));
+}
+
+/**
+ * Edita el perfil del usuario autenticado.
+ *
+ * El `userId` sale del token, nunca del cuerpo: no existe forma de pedir la
+ * edicion del perfil de otra persona porque el id ni siquiera viaja.
+ */
+export async function updateProfile(
+  db: DbClient,
+  userId: string,
+  input: UpdateProfileInput,
+): Promise<Profile> {
+  return toProfile(await profileRepository.update(db, userId, input));
 }

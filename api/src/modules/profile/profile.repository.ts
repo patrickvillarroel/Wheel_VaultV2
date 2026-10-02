@@ -1,5 +1,5 @@
 import type { DbClient } from '../../config/supabase.js';
-import type { Tables } from '../../types/database.types.js';
+import type { Tables, TablesUpdate } from '../../types/database.types.js';
 import { AppError } from '../../shared/errors/AppError.js';
 
 export type ProfileRow = Tables<'profiles'>;
@@ -19,6 +19,33 @@ export async function findById(db: DbClient, userId: string): Promise<ProfileRow
     // genérico (ver middleware/errorHandler.ts).
     throw AppError.internal('Ha ocurrido un error inesperado', {
       operation: 'profiles.findById',
+      code: error.code,
+      message: error.message,
+    });
+  }
+
+  return data;
+}
+
+/**
+ * Devuelve `null` si no se actualizo nada, que con la RLS activa solo puede
+ * significar que el perfil no es de este usuario.
+ */
+export async function update(
+  db: DbClient,
+  userId: string,
+  patch: TablesUpdate<'profiles'>,
+): Promise<ProfileRow | null> {
+  const { data, error } = await db
+    .from('profiles')
+    .update(patch)
+    .eq('id', userId)
+    .select('*')
+    .maybeSingle();
+
+  if (error) {
+    throw AppError.internal('Ha ocurrido un error inesperado', {
+      operation: 'profiles.update',
       code: error.code,
       message: error.message,
     });

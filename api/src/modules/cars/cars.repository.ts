@@ -91,6 +91,68 @@ export async function list(db: DbClient, userId: string, params: ListParams): Pr
   return data ?? [];
 }
 
+/**
+ * Cuántos autos tiene el usuario.
+ *
+ * `head: true` pide solo la cabecera con el conteo: no transfiere ni una fila,
+ * que es justo lo que se necesita para un numero en la pantalla de inicio.
+ */
+export async function countForUser(db: DbClient, userId: string): Promise<number> {
+  const { count, error } = await db
+    .from('cars')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  if (error) fail('cars.countForUser', error);
+
+  return count ?? 0;
+}
+
+export interface Totals {
+  /** Filas: cuantos modelos distintos. */
+  models: number;
+  /** Suma de `quantity`: cuantas piezas en total. */
+  units: number;
+}
+
+/**
+ * Los dos numeros de la cabecera del inventario, para unos filtros dados.
+ *
+ * No se calcula dentro de `list` porque alli hay un cursor: el conteo saldria
+ * "lo que queda despues de esta pagina", no el total.
+ *
+ * El conteo de filas no transfiere datos (`head: true`). La suma si: PostgREST
+ * solo expone funciones de agregacion si estan habilitadas en el proyecto, asi
+ * que en vez de depender de eso se traen las cantidades —una columna de
+ * enteros— y se suman aqui. Para una coleccion personal son unos pocos KB; si
+ * algun dia crecen a decenas de miles de filas, esto pasa a ser una funcion SQL.
+ */
+export async function totalsForFilters(
+  db: DbClient,
+  userId: string,
+  params: Pick<ListParams, 'brandId' | 'search'>,
+): Promise<Totals> {
+  function base() {
+    let query = db.from('cars').select('quantity').eq('user_id', userId);
+
+    if (params.brandId) query = query.eq('brand_id', params.brandId);
+    if (params.search) query = query.ilike('model', `%${escapeLikePattern(params.search)}%`);
+
+    return query;
+  }
+
+  const { data, error } = await base();
+
+  if (error) fail('cars.totalsForFilters', error);
+
+  const rows = data ?? [];
+
+  return {
+    models: rows.length,
+    units: rows.reduce((total, row) => total + row.quantity, 0),
+  };
+}
+
 export async function findById(
   db: DbClient,
   userId: string,

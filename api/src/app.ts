@@ -10,9 +10,10 @@ import { requestContext } from './middleware/requestContext.js';
 import { globalRateLimit } from './middleware/rateLimit.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { sendSuccess } from './shared/http/envelope.js';
-import { meRouter } from './modules/profile/profile.routes.js';
+import { meRouter, profileRouter } from './modules/profile/profile.routes.js';
 import { carsRouter } from './modules/cars/cars.routes.js';
 import { brandsRouter } from './modules/brands/brands.routes.js';
+import { statsRouter } from './modules/stats/stats.routes.js';
 
 /**
  * Las apps nativas no envian cabecera `Origin`, así que CORS no las afecta: es
@@ -92,8 +93,8 @@ export function createApp(): Express {
   v1.use('/me', meRouter);
   v1.use('/cars', carsRouter);
   v1.use('/brands', brandsRouter);
-  // Fase 8: v1.use('/stats', statsRouter)
-  // Fase 9: v1.use('/profile', profileRouter)
+  v1.use('/stats', statsRouter);
+  v1.use('/profile', profileRouter);
   app.use('/api/v1', v1);
 
   app.use(notFound);

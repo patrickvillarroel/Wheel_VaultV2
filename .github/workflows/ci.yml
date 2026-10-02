@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+# Si llegan dos pushes seguidos a la misma rama, el primero se cancela: el
+# resultado ya no interesa y ocupa un runner.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, tipos y tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # `npm ci` y no `npm install`: instala exactamente lo del lockfile y falla
+      # si package.json y package-lock.json no concuerdan.
+      - run: npm ci
+
+      # El resto depende de los tipos compilados de shared.
+      - run: npm run build
+
+      - run: npm run lint
+
+      - run: npm run format:check
+
+      # mobile no tiene .expo/types en CI (los genera Metro al arrancar), así
+      # que aquí las rutas se comprueban de forma laxa. Es el único punto donde
+      # CI es menos estricto que el entorno local.
+      - run: npm run typecheck
+
+      - run: npm test
+
+  security:
+    name: Secretos y dependencias
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Buscar secretos en lo versionado
+        run: npm run check:secrets
+
+      # El umbral es `high` a propósito: las 14 moderadas que arrastra el
+      # toolchain de Expo no tienen arreglo sin romper el SDK, y un CI que
+      # siempre está en rojo deja de leerse. Ver docs/security.md.
+      - name: Auditar dependencias
+        run: npm audit --audit-level=high

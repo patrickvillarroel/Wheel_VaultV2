@@ -3,8 +3,7 @@
 Base: `/api/v1`. Todas las rutas requieren `Authorization: Bearer <access_token>`
 salvo `/health`.
 
-> **Estado**: `/health`, `/me` (fase 2), `/cars` (fase 5) y `/brands` (fase 7)
-> implementados. `/stats/summary` llega en la fase 8 y `/profile` en la 9.
+> **Estado**: todos los endpoints del MVP están implementados.
 
 ## Autenticación
 
@@ -28,7 +27,7 @@ Añadir endpoints espejo solo agregaría un salto de red y superficie de ataque.
 | `GET` | `/brands/:id/cars` | Mis autos de esa marca, misma paginación que `/cars`. 404 si la marca no existe |
 | `GET` | `/profile` | Perfil |
 | `PATCH` | `/profile` | Edita `display_name` (y `bio` más adelante) |
-| `GET` | `/stats/summary` | Home: totales + últimos agregados, en un request |
+| `GET` | `/stats/summary` | Home en una sola llamada: `total_cars`, `total_brands` (de las que el usuario tiene algo) y `recent` |
 
 **PATCH y no PUT**: con PUT el cliente debe reenviar el recurso completo y puede
 borrar campos sin querer. En una pantalla de edición parcial, PATCH es lo
@@ -48,6 +47,21 @@ confirmación.
   "meta": { "next_cursor": "eyJjIjoiMjAyNi0wOS0zMCJ9", "has_more": true }
 }
 ```
+
+`GET /cars` añade dos totales a su `meta`:
+
+```jsonc
+"meta": {
+  "next_cursor": "...",
+  "has_more": true,
+  "total_models": 4,   // filas que cumplen el filtro
+  "total_units": 5     // suma de sus cantidades
+}
+```
+
+Solo se calculan en la **primera página**: avanzar no los cambia y recorrer la
+colección entera en cada página sería gastar por nada. En las siguientes llegan
+como `null`, que el cliente interpreta como «conserva los que ya mostrabas».
 
 **Error**
 

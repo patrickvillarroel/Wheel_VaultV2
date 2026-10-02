@@ -113,9 +113,9 @@ mobile/src/
 _layout (AuthProvider + QueryProvider)
    ├─ sin sesión → (auth): login ⇄ register ⇄ forgot-password → reset-password
    └─ con sesión → (tabs)
-         ├─ Inicio     → resumen · "Ver todas" marcas → brands/ · auto → car/[id]
+         ├─ Inicio     → hero + resumen · "Ver todas" → brands/ · auto → car/[id]
          ├─ Colección  → lista + filtro por marca · FAB → car/new
-         └─ Más        → profile/ → profile/edit · Logout
+         └─ Más        → menú: perfil, marcas, editar perfil · Logout
 ```
 
 Tabs del MVP: **Inicio · Colección · Más**. *Buscar* y *Favoritos* existen en el
@@ -135,9 +135,9 @@ en la base de datos, así que no habrá migración.
 | 5.5 | Fotos: Storage, subida, compresión, URLs firmadas | ✅ |
 | 6 | Inventario UI: lista, detalle, crear, editar, borrar, estados | ✅ |
 | 7 | Brands: API + conteos (pantallas con el móvil) | ✅ |
-| 8 | Home: `/stats/summary` + dashboard | ⬜ |
-| 9 | Perfil: ver, editar, logout | ⬜ |
-| 10 | Hardening: seguridad, auditoría, logs, accesibilidad, build EAS | ⬜ |
+| 8 | Home: `/stats/summary` + dashboard + pantallas de marcas | ✅ |
+| 9 | Perfil: ver, editar, logout | ✅ |
+| 10 | Hardening: CI, secretos, rate limiting por usuario, logout robusto | ✅ |
 
 ## Decisiones registradas
 

@@ -3,10 +3,9 @@
 App móvil para administrar una colección de carros a escala. Cada usuario tiene
 su propio inventario y solo puede ver y modificar lo que le pertenece.
 
-> **Estado actual: fases 0–7 completadas** — base de datos con RLS, backend
-> completo (auth, autos, marcas) y app móvil con autenticación, inventario
-> completo y fotos. Quedan la Home (fase 8), el perfil (9) y el
-> endurecimiento (10).
+> **Estado actual: MVP completo** (fases 0–10). Base de datos con RLS, backend
+> completo, app móvil con autenticación, inventario con fotos, marcas, inicio y
+> perfil, y CI verificándolo todo en cada push.
 > Roadmap completo en [docs/architecture.md](docs/architecture.md).
 
 ## Stack
@@ -31,6 +30,7 @@ su propio inventario y solo puede ver y modificar lo que le pertenece.
 └─ docs/
    ├─ supabase-setup.md   Guía de Supabase desde cero
    ├─ probar-la-api.md    Cómo verificar la API contra la base de datos real
+   ├─ despliegue.md       Subir la API a internet y generar el APK
    ├─ architecture.md     Arquitectura y roadmap
    ├─ database.md         Modelo de datos, índices y policies
    ├─ security.md         Controles de seguridad
@@ -76,6 +76,8 @@ curl http://localhost:4000/health
 | `npm run lint` · `npm run lint:fix` | ESLint |
 | `npm run format` | Prettier |
 | `npm test` | Tests de todos los workspaces (repositorios simulados) |
+| `npm run verify` | Todo lo anterior de una vez: lo mismo que ejecuta CI |
+| `npm run check:secrets` | Busca secretos en lo que Git rastrea |
 | `npm run smoke` | Prueba de humo contra la API y la base de datos reales |
 | `npm run db:types` | Regenera los tipos TypeScript desde el esquema (requiere `supabase link`) |
 

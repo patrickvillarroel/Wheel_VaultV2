@@ -58,7 +58,7 @@ Fabricantes del modelo a escala. Modelo híbrido (ADR-003):
 | `name` | text NOT NULL | CHECK 1..60 |
 | `slug` | text NOT NULL | CHECK formato `kebab-case`; para assets y URLs |
 | `description` | text | CHECK ≤ 1000 |
-| `logo_url` | text | CHECK ≤ 500 |
+| `logo_url` | text | CHECK ≤ 500. Vacío en el catálogo global: esos logotipos van incluidos en la app (ver `mobile/README.md`). Esta columna es para las marcas privadas de un usuario |
 | `created_by` | uuid | NULL = global |
 | `created_at` / `updated_at` | timestamptz | |
 

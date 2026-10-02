@@ -21,6 +21,8 @@ vi.mock('../src/modules/cars/cars.repository.js', () => ({
   insert: vi.fn(),
   update: vi.fn(),
   remove: vi.fn(),
+  countForUser: vi.fn(),
+  totalsForFilters: vi.fn(),
 }));
 
 const { createApp } = await import('../src/app.js');
@@ -46,6 +48,7 @@ let token: string;
 beforeEach(async () => {
   vi.clearAllMocks();
   token = await signTestToken();
+  vi.mocked(carsRepository.totalsForFilters).mockResolvedValue({ models: 0, units: 0 });
 });
 
 function authed(path: string) {
@@ -151,7 +154,7 @@ describe('GET /api/v1/brands/:id/cars', () => {
     const response = await authed(`/api/v1/brands/${BRAND_ID}/cars`);
 
     expect(response.status).toBe(200);
-    expect(response.body.meta).toEqual({ next_cursor: null, has_more: false });
+    expect(response.body.meta).toMatchObject({ next_cursor: null, has_more: false });
   });
 
   it('acota por el user_id del token y por la marca de la URL', async () => {

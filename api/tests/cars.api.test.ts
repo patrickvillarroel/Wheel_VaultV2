@@ -18,6 +18,8 @@ vi.mock('../src/modules/cars/cars.repository.js', () => ({
   insert: vi.fn(),
   update: vi.fn(),
   remove: vi.fn(),
+  countForUser: vi.fn(),
+  totalsForFilters: vi.fn(),
 }));
 
 // Se simulan todas las exportaciones, no solo la que usa cars.service: el app
@@ -62,6 +64,7 @@ beforeEach(async () => {
   vi.clearAllMocks();
   token = await signTestToken();
   vi.mocked(brandsRepository.findVisibleById).mockResolvedValue(brand);
+  vi.mocked(carsRepository.totalsForFilters).mockResolvedValue({ models: 0, units: 0 });
 });
 
 function authed(method: 'get' | 'post' | 'patch' | 'delete', path: string) {
@@ -92,7 +95,7 @@ describe('GET /api/v1/cars', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.data).toHaveLength(1);
-    expect(response.body.meta).toEqual({ next_cursor: null, has_more: false });
+    expect(response.body.meta).toMatchObject({ next_cursor: null, has_more: false });
   });
 
   it('consulta SIEMPRE con el user_id del token', async () => {
@@ -161,6 +164,42 @@ describe('GET /api/v1/cars', () => {
     const response = await authed('get', '/api/v1/cars?sort=precio');
 
     expect(response.status).toBe(422);
+  });
+
+  it('devuelve los totales de modelos y unidades', async () => {
+    vi.mocked(carsRepository.list).mockResolvedValue([car]);
+    vi.mocked(carsRepository.totalsForFilters).mockResolvedValue({ models: 4, units: 5 });
+
+    const response = await authed('get', '/api/v1/cars');
+
+    expect(response.body.meta).toMatchObject({ total_models: 4, total_units: 5 });
+  });
+
+  it('los totales respetan el filtro por fabricante', async () => {
+    vi.mocked(carsRepository.list).mockResolvedValue([]);
+
+    await authed('get', `/api/v1/cars?brand_id=${BRAND_ID}`);
+
+    expect(carsRepository.totalsForFilters).toHaveBeenCalledWith(
+      expect.anything(),
+      TEST_USER_ID,
+      expect.objectContaining({ brandId: BRAND_ID }),
+    );
+  });
+
+  it('no recalcula los totales al pedir una página siguiente', async () => {
+    // Avanzar en la lista no cambia el total, y recalcularlo en cada página
+    // seria recorrer la coleccion entera una y otra vez.
+    vi.mocked(carsRepository.list).mockResolvedValue([]);
+
+    const cursor = Buffer.from(
+      JSON.stringify({ c: '2026-09-30T12:00:00.000Z', i: CAR_ID }),
+    ).toString('base64url');
+
+    const response = await authed('get', `/api/v1/cars?cursor=${cursor}`);
+
+    expect(carsRepository.totalsForFilters).not.toHaveBeenCalled();
+    expect(response.body.meta.total_models).toBeNull();
   });
 });
 

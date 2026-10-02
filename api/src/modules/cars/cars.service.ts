@@ -17,24 +17,52 @@ import type { ListCarsQuery } from './cars.schema.js';
 
 export type Car = CarRow;
 
+export interface CarsPage extends Page<Car> {
+  meta: Page<Car>['meta'] & {
+    /** Modelos distintos que cumplen el filtro. `null` si no se calculó. */
+    total_models: number | null;
+    /** Suma de las cantidades. `null` si no se calculó. */
+    total_units: number | null;
+  };
+}
+
 export async function listCars(
   db: DbClient,
   userId: string,
   query: ListCarsQuery,
-): Promise<Page<Car>> {
+): Promise<CarsPage> {
   const cursor = query.cursor ? decodeCursor(query.cursor) : undefined;
 
-  // Se pide una fila de más para saber si hay pagina siguiente sin lanzar un
-  // COUNT aparte, que sobre una tabla con RLS es caro.
-  const rows = await carsRepository.list(db, userId, {
-    brandId: query.brand_id,
-    search: query.q,
-    ascending: query.sort === 'oldest',
-    cursor,
-    limit: query.limit + 1,
-  });
+  const filters = { brandId: query.brand_id, search: query.q };
 
-  return buildPage(rows, query.limit, (row) => ({ createdAt: row.created_at, id: row.id }));
+  // Los totales solo se calculan en la primera página: no cambian al avanzar y
+  // el cliente ya los tiene. En las siguientes viajan como `null`, que el móvil
+  // interpreta como "conserva los que ya mostrabas".
+  const [rows, totals] = await Promise.all([
+    // Se pide una fila de más para saber si hay página siguiente sin lanzar un
+    // COUNT aparte, que sobre una tabla con RLS es caro.
+    carsRepository.list(db, userId, {
+      ...filters,
+      ascending: query.sort === 'oldest',
+      cursor,
+      limit: query.limit + 1,
+    }),
+    cursor ? Promise.resolve(null) : carsRepository.totalsForFilters(db, userId, filters),
+  ]);
+
+  const page = buildPage(rows, query.limit, (row) => ({
+    createdAt: row.created_at,
+    id: row.id,
+  }));
+
+  return {
+    items: page.items,
+    meta: {
+      ...page.meta,
+      total_models: totals?.models ?? null,
+      total_units: totals?.units ?? null,
+    },
+  };
 }
 
 export async function getCar(db: DbClient, userId: string, carId: string): Promise<Car> {

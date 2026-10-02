@@ -1,0 +1,51 @@
+# Despliegue de la API en Render.
+#
+# Es un "Blueprint": Render lee este archivo del repositorio y crea el servicio
+# con esta configuración, en lugar de que la rellenes a mano en el panel. Si
+# mañana hay que recrearlo, sale igual.
+#
+# Instrucciones paso a paso: docs/despliegue.md
+
+services:
+  - type: web
+    name: collectors-project-api
+    runtime: node
+    plan: free
+    region: oregon
+
+    # El build se lanza desde la raíz del monorepo: la API importa
+    # @wheel-vault/shared, que hay que compilar antes. `npm run build` de la
+    # raíz hace las dos en orden.
+    buildCommand: npm ci && npm run build
+    startCommand: npm start --workspace=api
+
+    # Render reinicia el servicio si esta ruta deja de responder.
+    healthCheckPath: /health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # `engines` del package.json pide Node 20 o superior.
+      - key: NODE_VERSION
+        value: '20'
+
+      # `sync: false` significa "este valor se escribe en el panel de Render,
+      # no en el repositorio". Es lo que evita que las claves acaben en Git.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+
+      # Solo si tu proyecto de Supabase todavía firma con el secreto compartido
+      # (HS256). Los proyectos nuevos usan claves asimétricas y no lo necesitan.
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+
+      # Vacío a propósito: la app móvil no envía cabecera `Origin`, así que CORS
+      # no le afecta. Esta lista solo haría falta con un frontend web.
+      - key: CORS_ORIGINS
+        value: ''
+
+    # SUPABASE_SERVICE_ROLE_KEY NO está aquí, y es deliberado: la API no la
+    # necesita (ADR-002) y cuantos menos sitios tengan ese secreto, mejor.
