@@ -96,6 +96,15 @@ Debe responder `{"success":true,"data":{"status":"ok",...}}`.
 Si falla, mira los logs en el panel de Render: el arranque valida las variables
 de entorno y dice exactamente cuál falta.
 
+### Si falla con «native WebSocket not found»
+
+El servicio está corriendo con Node 20 o anterior. `createClient` de supabase-js
+necesita el `WebSocket` global, que no existe hasta Node 22, así que la API
+arranca pero revienta en cuanto llega una petición autenticada.
+
+`render.yaml` fija `NODE_VERSION: '22'`. Si tocaste esa variable desde el panel
+de Render, el valor del panel manda sobre el del archivo: corrígelo ahí.
+
 ### Si todo devuelve 500
 
 Hay dos configuraciones que rompen la API entera y desde fuera se ven igual: no

@@ -31,9 +31,13 @@ services:
       - key: NODE_ENV
         value: production
 
-      # `engines` del package.json pide Node 20 o superior.
+      # Node 22 como mínimo, y no es una preferencia: `createClient` de
+      # supabase-js inicializa un cliente de Realtime que necesita el
+      # `WebSocket` global, y ese global no existe hasta Node 22. Con Node 20
+      # la API arranca pero revienta en la primera petición autenticada con
+      # "Node.js detected but native WebSocket not found".
       - key: NODE_VERSION
-        value: '20'
+        value: '22'
 
       # `sync: false` significa "este valor se escribe en el panel de Render,
       # no en el repositorio". Es lo que evita que las claves acaben en Git.

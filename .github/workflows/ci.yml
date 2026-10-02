@@ -19,9 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # La versión MÍNIMA que soporta el proyecto, no la más nueva: CI está
+      # para detectar lo que se rompe en el suelo soportado. Correrlo en una
+      # versión más moderna que la de producción deja pasar fallos como el de
+      # `WebSocket`, que solo aparecía por debajo de Node 22.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       # `npm ci` y no `npm install`: instala exactamente lo del lockfile y falla
@@ -49,9 +53,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # La versión MÍNIMA que soporta el proyecto, no la más nueva: CI está
+      # para detectar lo que se rompe en el suelo soportado. Correrlo en una
+      # versión más moderna que la de producción deja pasar fallos como el de
+      # `WebSocket`, que solo aparecía por debajo de Node 22.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
