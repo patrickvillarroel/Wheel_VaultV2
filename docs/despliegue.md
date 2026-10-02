@@ -96,6 +96,23 @@ Debe responder `{"success":true,"data":{"status":"ok",...}}`.
 Si falla, mira los logs en el panel de Render: el arranque valida las variables
 de entorno y dice exactamente cuál falta.
 
+### Si todo devuelve 500
+
+Hay dos configuraciones que rompen la API entera y desde fuera se ven igual: no
+poder verificar los tokens, y no poder hablar con Supabase. Este comando las
+distingue sin necesitar credenciales:
+
+```bash
+npm run diagnose -- https://collectors-project-api.onrender.com
+```
+
+Manda un token HS256 bien formado pero firmado con una clave inventada. Si la
+API responde **401**, es que pudo comprobar la firma y rechazarla: el secreto
+está bien y el problema es la base de datos. Si responde **500**, ni lo intentó:
+falta `SUPABASE_JWT_SECRET`.
+
+El script dice cuál es y qué mirar.
+
 ### 5. Pásale la prueba de humo
 
 Apunta el script a la API desplegada y vuelve a ejecutarlo. Verifica lo mismo
