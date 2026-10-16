@@ -1,0 +1,6 @@
+node_modules/
+dist/
+coverage/
+*.md
+api/src/types/database.types.ts
+mobile/expo-env.d.ts

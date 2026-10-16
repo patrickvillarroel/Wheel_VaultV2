@@ -1,0 +1,46 @@
+{
+  "name": "wheel-vault",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Collector's Project — app para administrar una coleccion de carros a escala",
+  "workspaces": [
+    "shared",
+    "api",
+    "mobile"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:api": "npm run dev --workspace=api",
+    "build": "npm run build --workspace=shared && npm run build --workspace=api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . && npm run lint --workspace=mobile",
+    "lint:fix": "eslint . --fix && npm run lint --workspace=mobile -- --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "db:types": "node scripts/gen-types.mjs",
+    "gen:icons": "node scripts/gen-icons.mjs",
+    "optimize:logos": "node scripts/optimize-brand-logos.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "dev:mobile": "npm run start --workspace=mobile",
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "audit:deps": "node scripts/audit-deps.mjs",
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run check:secrets",
+    "diagnose": "node scripts/diagnose-api.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0"
+  },
+  "dependencies": {
+    "expo": "~57.0.26",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
+  }
+}

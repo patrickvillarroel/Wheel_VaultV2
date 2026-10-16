@@ -1,1 +1,110 @@
-# Wheel_VaultV2
+# Collector's Project
+
+App móvil para administrar una colección de carros a escala. Cada usuario tiene
+su propio inventario y solo puede ver y modificar lo que le pertenece.
+
+> **Estado actual: MVP completo** (fases 0–10). Base de datos con RLS, backend
+> completo, app móvil con autenticación, inventario con fotos, marcas, inicio y
+> perfil, y CI verificándolo todo en cada push.
+> Roadmap completo en [docs/architecture.md](docs/architecture.md).
+
+## Stack
+
+| Capa | Tecnología |
+|---|---|
+| Móvil | React Native · Expo · TypeScript · Expo Router |
+| API | Node.js · Express 5 · TypeScript · Zod |
+| Datos | Supabase · PostgreSQL · Row Level Security |
+| Identidad | Supabase Auth (JWT) |
+
+## Estructura
+
+```
+.
+├─ api/          Backend Express (TypeScript)
+├─ mobile/       App React Native + Expo (SDK 57)
+├─ shared/       Límites de validación y códigos de error compartidos
+├─ supabase/
+│  ├─ migrations/   Esquema de la base de datos (SQL)
+│  └─ tests/        Pruebas de aislamiento entre usuarios (RLS)
+└─ docs/
+   ├─ supabase-setup.md   Guía de Supabase desde cero
+   ├─ probar-la-api.md    Cómo verificar la API contra la base de datos real
+   ├─ despliegue.md       Subir la API a internet y generar el APK
+   ├─ architecture.md     Arquitectura y roadmap
+   ├─ database.md         Modelo de datos, índices y policies
+   ├─ security.md         Controles de seguridad
+   ├─ api.md              Contrato de la API REST
+   └─ decisions/          ADR — por qué cada decisión importante
+```
+
+## Puesta en marcha
+
+Requisitos: **Node.js 22 o superior** y una cuenta de Supabase (gratuita).
+
+> Node 22 no es una preferencia: `createClient` de supabase-js monta un cliente
+> de Realtime que necesita el `WebSocket` global, y ese global no existe antes
+> de Node 22. Con Node 20 la API arranca pero falla en la primera petición
+> autenticada.
+
+```bash
+npm install
+```
+
+```bash
+cp api/.env.example api/.env
+```
+
+Luego sigue **[docs/supabase-setup.md](docs/supabase-setup.md)** para crear el
+proyecto de Supabase, rellenar `api/.env`, aplicar las migraciones y verificar
+que el aislamiento entre usuarios funciona. Es la guía principal si nunca has
+usado Supabase.
+
+Con eso listo:
+
+```bash
+npm run dev:api
+```
+
+```bash
+curl http://localhost:4000/health
+```
+
+## Comandos
+
+| Comando | Qué hace |
+|---|---|
+| `npm run dev:api` | Levanta la API en modo watch |
+| `npm run dev:mobile` | Arranca Expo (móvil y web) |
+| `npm run build` | Compila `shared` y `api` |
+| `npm run typecheck` | Comprueba los tipos de todos los workspaces |
+| `npm run lint` · `npm run lint:fix` | ESLint |
+| `npm run format` | Prettier |
+| `npm test` | Tests de todos los workspaces (repositorios simulados) |
+| `npm run verify` | Todo lo anterior de una vez: lo mismo que ejecuta CI |
+| `npm run check:secrets` | Busca secretos en lo que Git rastrea |
+| `npm run smoke` | Prueba de humo contra la API y la base de datos reales |
+| `npm run diagnose -- <url>` | Localiza por qué una API desplegada devuelve 500 |
+| `npm run db:types` | Regenera los tipos TypeScript desde el esquema (requiere `supabase link`) |
+
+## Reglas del proyecto
+
+1. `service_role key` y `JWT secret` **solo** en `api/.env`. Nunca en la app
+   móvil, nunca en Git.
+2. Ninguna tabla nueva sin su RLS y sus policies **en la misma migración**.
+3. El esquema no se edita desde el dashboard: todo cambio es una migración.
+4. Después de tocar el esquema: `npm run db:types` y volver a correr
+   `supabase/tests/rls_isolation.sql`.
+5. `user_id` siempre sale del token, nunca del body o la query.
+
+## Git
+
+```
+main                 ← releases
+└─ develop           ← integración
+   ├─ feature/<fase>
+   └─ fix/<asunto>
+```
+
+Commits en formato Conventional Commits: `feat:`, `fix:`, `refactor:`, `docs:`,
+`chore:`, `test:`.
