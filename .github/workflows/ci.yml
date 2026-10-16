@@ -67,8 +67,10 @@ jobs:
       - name: Buscar secretos en lo versionado
         run: npm run check:secrets
 
-      # El umbral es `high` a propósito: las 14 moderadas que arrastra el
-      # toolchain de Expo no tienen arreglo sin romper el SDK, y un CI que
-      # siempre está en rojo deja de leerse. Ver docs/security.md.
+      # No es `npm audit` a secas: falla a partir de `high`, pero permite
+      # aceptar avisos concretos por escrito y con motivo. Hace falta porque
+      # hay avisos publicados contra la ULTIMA version de un paquete, sin nada
+      # a lo que actualizar, y un CI siempre en rojo deja de leerse. La lista
+      # de aceptados vive en el propio script. Ver docs/security.md.
       - name: Auditar dependencias
-        run: npm audit --audit-level=high
+        run: npm run audit:deps

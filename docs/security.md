@@ -149,17 +149,30 @@ que el id existe y filtra información.
 
 ## Vulnerabilidades aceptadas (y por qué)
 
-`npm audit` reporta **14 moderadas**, todas transitivas del propio toolchain de
-Expo. `npm audit fix --force` las "arregla" degradando `expo-router` a una
-versión incompatible con el SDK 57, es decir, rompiendo el proyecto. No se hace.
+Todas las que reporta `npm audit` son transitivas del propio toolchain de Expo.
+`npm audit fix --force` las "arregla" degradando `expo` a la versión 44, es
+decir, rompiendo el proyecto. No se hace.
 
-| Cadena | Dónde vive | Riesgo real |
+CI no usa `npm audit` a secas sino `npm run audit:deps`
+(`scripts/audit-deps.mjs`), que falla a partir de **high** pero permite aceptar
+avisos concretos con su motivo escrito al lado. La diferencia importa: con
+`--audit-level=high` a secas, el día que apareció un aviso high sin parche
+disponible la única salida era bajar el umbral, y entonces dejas de ver todo lo
+que venga después. Así se acepta ese y se sigue fallando con cualquier otro.
+
+La lista de aceptados vive en el script, no aquí, para que no se desincronice.
+Hoy contiene:
+
+| Aviso | Cadena | Por qué se acepta |
 |---|---|---|
-| `decode-uri-component` ← `query-string` ← `expo-router` | En la app | DoS al parsear un deep link malformado. Afecta a la app del propio usuario, no al servidor |
-| `uuid` ← `xcode` ← `@expo/config-plugins` | Solo build (`prebuild` de iOS) | No viaja en el bundle |
+| `braces` GHSA-vfj7-8cjw-p6xm (high) | `micromatch` ← `@expo/metro-file-map` | **No hay versión corregida**: 3.0.3 es la última publicada y es la señalada. Es el empaquetador: corre al compilar, no en el teléfono |
+| `node-forge` GHSA-86w9-cpqp-85rv (high) | `@expo/code-signing-certificates` ← `expo-updates`, y `@expo/cli` | **No hay versión corregida**: 1.4.0 es la última y es la señalada. No firmamos actualizaciones OTA, la ruta no se ejecuta |
+| `decode-uri-component` ← `query-string` ← `expo-router` (moderate) | En la app | DoS al parsear un deep link malformado. Afecta a la app del propio usuario, no al servidor |
+| `uuid` ← `xcode` ← `@expo/config-plugins` (moderate) | Solo build (`prebuild` de iOS) | No viaja en el bundle |
 
-Se revisa cuando Expo publique una versión que suba esas dependencias. Anotado
-en la lista de la fase 10.
+El script avisa cuando un aviso aceptado deja de aparecer, para que la lista se
+limpie en vez de crecer. Las dos `high` se revisan cuando `braces` y
+`node-forge` publiquen parche.
 
 `api/` y `shared/` están en **0 vulnerabilidades**.
 
